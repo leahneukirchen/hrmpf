@@ -28,6 +28,9 @@ LABEL linuxram
 MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (load to RAM)
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram=1
+LABEL memtest86+
+MENU LABEL memtest86+
+KERNEL /boot/memtest86+
 LABEL c
 MENU LABEL Boot first HD found by BIOS
 COM32 chain.c32

@@ -29,7 +29,7 @@
 set -E
 trap "echo; error_out $LINENO $?" INT TERM HUP ERR
 
-readonly REQUIRED_PKGS="base-files syslinux grub-x86_64-efi squashfs-tools xorriso"
+readonly REQUIRED_PKGS="base-files syslinux grub-x86_64-efi squashfs-tools xorriso memtest86+"
 readonly PROGNAME=$(basename $0)
 
 info_msg() {
@@ -142,6 +142,7 @@ generate_initramfs() {
 
     mv $VOIDHOSTDIR/boot/initrd $BOOT_DIR
     cp $VOIDHOSTDIR/boot/vmlinuz-$KERNELVERSION $BOOT_DIR/vmlinuz
+    cp $VOIDHOSTDIR/boot/memtest86+ $BOOT_DIR
 }
 
 generate_isolinux_boot() {
