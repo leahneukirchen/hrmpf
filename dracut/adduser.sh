@@ -4,7 +4,7 @@
 
 type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
 
-echo void-live > ${NEWROOT}/etc/hostname
+echo hrmpf > ${NEWROOT}/etc/hostname
 
 USERNAME=$(getarg live.user)
 USERSHELL=$(getarg live.shell)
@@ -48,3 +48,5 @@ polkit.addRule(function(action, subject) {
 _EOF
     chroot ${NEWROOT} chown polkitd:polkitd /etc/polkit-1/rules.d/void-live.rules
 fi
+
+chroot ${NEWROOT} usermod -s /bin/bash root
