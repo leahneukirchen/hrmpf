@@ -1,40 +1,19 @@
-## The Void Linux image/live/rootfs maker and installer
+     _                    __ 
+    | |_  _ _ _ __  _ __ / _|
+    | ' \| '_| '  \| '_ \  _|
+    |_||_|_| |_|_|_| .__/_|    version 0.1  "Kiasoachbomba"
+                   |_|       
 
-This repository contains utilities for Void Linux:
-
- * installer (The Void Linux el-cheapo installer for x86)
- * mklive    (The Void Linux live image maker for x86)
-
- * mkimage   (The Void Linux image maker for ARM platforms)
- * mkrootfs  (The Void Linux rootfs maker for ARM platforms)
+Welcome to the hrmpf rescue system, built on Void Linux.
 
 #### Dependencies
 
  * xbps>=0.35
  * GNU bash
- * parted (for mkimage)
- * qemu-user-static binaries (for mkrootfs)
 
 #### Usage
 
-Type
+    % ./mkhrmpf.sh
+    % linux32 ./mkhrmpf.sh
 
-    $ make
-
-and then see the usage output:
-
-    $ ./mklive.sh -h
-    $ ./mkrootfs.sh -h
-    $ ./mkimage.sh -h
-
-#### Examples
-
-Build an x86 live image with runit and keyboard set to 'fr':
-
-    # ./mklive.sh -k fr
-
-Build an x86 live image with systemd and some optional packages:
-
-    # ./mklive.sh -b base-system-systemd -p 'vim rtorrent'
-
-See the usage output for more information :-)
+This project is based on void-mklive.
