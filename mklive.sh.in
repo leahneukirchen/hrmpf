@@ -318,7 +318,7 @@ _linux_series=$($XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -x linux)
 KERNELVERSION=$($XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -p pkgver ${_linux_series})
 KERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion $KERNELVERSION)
 
-: ${OUTPUT_FILE="void-live-$(uname -m)-${KERNELVERSION}-$(date +%Y%m%d).iso"}
+: ${OUTPUT_FILE="hrmpf-$(uname -m)-${KERNELVERSION}-$(date +%Y%m%d).iso"}
 
 #
 # Install required packages to generate the image.
