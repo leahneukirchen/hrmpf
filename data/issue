@@ -1,6 +1,11 @@
-###############################################################################
+ _                    __ 
+| |_  _ _ _ __  _ __ / _|
+| ' \| '_| '  \| '_ \  _|
+|_||_|_| |_|_|_| .__/_|    version 0.1  "Kiasoachbomba"
+               |_|       
 
-Welcome to the Void Linux Live system. Two users are available to log in:
+Welcome to the hrmpf rescue system, built on Void Linux.
+There are two accounts:
 
 	- root:voidlinux
 	- anon:voidlinux
@@ -8,18 +13,14 @@ Welcome to the Void Linux Live system. Two users are available to log in:
 The `anon` user additionally has `sudo(8)` permissions to run any command
 without a password.
 
-To start the installation please type:
+You can also use this disk to install Void:
 
     # void-installer
 
-and follow the on-screen instructions. To install additional software make
+and follow the on-screen instructions.  To install additional software make
 sure to configure your network interface and then use:
 
 	- xbps-install(8) to install/update packages
 	- xbps-query(8) to query for package info
 
-Thanks for using Void Linux.
-
-    http://www.voidlinux.eu
-
-###############################################################################
+Enjoy!
