@@ -21,19 +21,11 @@ Possibly interesting packages found in grml not yet in void:
 
 bacula?
 blktrace? no kernel support
-bonnie?
 buffer?
 centerim?
 chkrootkit?
 clonezilla?
-daemon?
+daemon? daemonize
 hwinfo?
 ipmitool?
 ipsec-tools?
-jfsutils?
-mbuffer?
-mcelog?
-sleuthkit?
-slrn?
-unison?
-vlock?
