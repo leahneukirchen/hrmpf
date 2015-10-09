@@ -29,15 +29,17 @@ MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (RAM)
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
 LABEL memtest86+
-MENU LABEL memtest86+
-KERNEL /boot/memtest86+
+MENU LABEL memtest86+ 5.01
+KERNEL memdisk
+INITRD /boot/memtest86+-5.01.iso
+APPEND iso
 LABEL mhdd32
 MENU LABEL MHDD32 v4.6 Hard Drive Analysis Tool
 KERNEL memdisk
 INITRD /boot/mhdd32ver4.6.iso
 APPEND iso
 LABEL ipxe
-MENU LABEL iPXE
+MENU LABEL iPXE 1.0.0+
 KERNEL memdisk
 INITRD /boot/ipxe.iso
 APPEND iso
