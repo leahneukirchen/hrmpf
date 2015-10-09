@@ -21,6 +21,12 @@ if [ -d ${NEWROOT}/etc/gdm ]; then
     fi
 fi
 
+# Configure KDM autologin
+if [ -e ${NEWROOT}/etc/kdm/kdmrc ]; then
+    sed -i -e "s|^\#\(AutoLoginEnable=\).*|\1|" ${NEWROOT}/etc/kdm/kdmrc
+    sed -i -e "s|^\#\(AutoLoginUser=\).*|\1$USERNAME|" ${NEWROOT}/etc/kdm/kdmrc
+fi
+
 # Configure lightdm autologin.
 if [ -r ${NEWROOT}/etc/lightdm.conf ]; then
     sed -i -e "s|^\#\(default-user=\).*|\1$USERNAME|" \
@@ -34,5 +40,17 @@ if [ -r ${NEWROOT}/etc/lxdm/lxdm.conf ]; then
     sed -e "s,.*autologin.*=.*,autologin=$USERNAME," -i ${NEWROOT}/etc/lxdm/lxdm.conf
     if [ -x ${NEWROOT}/usr/bin/enlightenment_start ]; then
         sed -e "s,.*session.*=.*,session=/usr/bin/enlightenment_start," -i ${NEWROOT}/etc/lxdm/lxdm.conf
+    elif [ -x ${NEWROOT}/usr/bin/startxfce4 ]; then
+        sed -e "s,.*session.*=.*,session=/usr/bin/startxfce4," -i ${NEWROOT}/etc/lxdm/lxdm.conf
+    elif [ -x ${NEWROOT}/usr/bin/mate-session ]; then
+        sed -e "s,.*session.*=.*,session=/usr/bin/mate-session," -i ${NEWROOT}/etc/lxdm/lxdm.conf
+    elif [ -x ${NEWROOT}/usr/bin/cinnamon-session ]; then
+        sed -e "s,.*session.*=.*,session=/usr/bin/cinnamon-session," -i ${NEWROOT}/etc/lxdm/lxdm.conf
+    elif [ -x ${NEWROOT}/usr/bin/i3 ]; then
+        sed -e "s,.*session.*=.*,session=/usr/bin/i3," -i ${NEWROOT}/etc/lxdm/lxdm.conf
+    elif [ -x ${NEWROOT}/usr/bin/startlxde ]; then
+        sed -e "s,.*session.*=.*,session=/usr/bin/startlxde," -i ${NEWROOT}/etc/lxdm/lxdm.conf
+    elif [ -x ${NEWROOT}/usr/bin/startlxqt ]; then
+        sed -e "s,.*session.*=.*,session=/usr/bin/startlxqt," -i ${NEWROOT}/etc/lxdm/lxdm.conf
     fi
 fi

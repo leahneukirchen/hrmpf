@@ -1,6 +1,6 @@
 #!/bin/sh
 #-
-# Copyright (c) 2013-2014 Juan Romero Pardines.
+# Copyright (c) 2013-2015 Juan Romero Pardines.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,11 +45,13 @@ usage() {
     cat <<_EOF
 Usage: $PROGNAME [options] <platform>
 
-Supported platforms: cubieboard2, odroid-u2, rpi
+Supported platforms: i686, i686-musl, x86_64, x86_64-musl,
+                     dockstar, bananapi, beaglebone, cubieboard2, cubietruck,
+                     odroid-u2, rpi, rpi2 (armv7), usbarmory
 
 Options
     -b <syspkg> Set an alternative base-system package (defaults to base-system)
-    -c <dir>    Set XBPS cache directory (defaults to /var/cache/xbps)
+    -c <dir>    Set XBPS cache directory (defaults to \$PWD/xbps-cachedir-<arch>)
     -C <file>   Full path to the XBPS configuration file
     -h          Show this help
     -p <pkgs>   Additional packages to install into the rootfs (separated by blanks)
@@ -73,7 +75,7 @@ umount_pseudofs() {
 
 run_cmd_target() {
     info_msg "Running $@ for target $_ARCH ..."
-    eval XBPS_TARGET_ARCH=${_ARCH} "$@"
+    eval XBPS_TARGET_ARCH=${_TARGET_ARCH:=${_ARCH}} "$@"
     [ $? -ne 0 ] && die "Failed to run $@"
 }
 
@@ -87,8 +89,9 @@ register_binfmt() {
     if [ "$ARCH" = "${_ARCH}" ]; then
         return 0
     fi
+    mountpoint -q /proc/sys/fs/binfmt_misc || modprobe -q binfmt_misc; mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc
     case "${_ARCH}" in
-        armv?l)
+        armv*)
             echo ':arm:M::\x7fELF\x01\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x28\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-arm-static:' > /proc/sys/fs/binfmt_misc/register
             cp -f $(which qemu-arm-static) $rootfs/usr/bin || die "failed to copy qemu-arm-static to the rootfs"
             ;;
@@ -98,9 +101,6 @@ register_binfmt() {
     esac
 }
 
-: ${XBPS_REPOSITORY:=--repository=http://repo.voidlinux.eu/current}
-: ${XBPS_CACHEDIR:=--cachedir=/var/cache/xbps}
-: ${PKGBASE:=base-system}
 #
 # main()
 #
@@ -111,23 +111,48 @@ while getopts "b:C:c:hp:r:V" opt; do
         c) XBPS_CACHEDIR="--cachedir=$OPTARG";;
         h) usage; exit 0;;
         p) EXTRA_PKGS="$OPTARG";;
-        r) XBPS_REPOSITORY="--repository=$OPTARG $XBPS_REPOSITORY";;
+        r) XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=$OPTARG";;
         V) echo "$PROGNAME @@MKLIVE_VERSION@@"; exit 0;;
     esac
 done
 shift $(($OPTIND - 1))
 
 PLATFORM="$1"
+SUBPLATFORM=$PLATFORM
+
+case "$PLATFORM" in
+    i686-musl) _TARGET_ARCH="$PLATFORM"; _ARCH="i386";;
+    i686) _TARGET_ARCH="$PLATFORM"; _ARCH="i386";;
+    x86_64-musl) _TARGET_ARCH="$PLATFORM"; _ARCH="x86_64";;
+    x86_64) _TARGET_ARCH="$PLATFORM"; _ARCH="x86_64";;
+    dockstar) _TARGET_ARCH="armv5tel"; _ARCH="armv5tel";;
+    rpi-musl) _TARGET_ARCH="armv6l-musl"; _ARCH="armv6l";;
+    rpi) _TARGET_ARCH="armv6l"; _ARCH="armv6l";;
+    *-musl) _TARGET_ARCH="armv7l-musl"; _ARCH="armv7l";;
+    *) _TARGET_ARCH="armv7l"; _ARCH="armv7l";;
+esac
+
+: ${XBPS_REPOSITORY:=--repository=http://repo.voidlinux.eu/current --repository=http://muslrepo.voidlinux.eu/current}
+: ${XBPS_CACHEDIR:=--cachedir=$PWD/xbps-cachedir-${_TARGET_ARCH}}
+: ${PKGBASE:=base-system}
 
 if [ -z "$PLATFORM" ]; then
     echo "$PROGNAME: platform was not set!"
     usage; exit 1
 fi
 
+
 case "$PLATFORM" in
-    cubieboard2) _ARCH="armv7l"; QEMU_BIN=qemu-arm-static;;
-    odroid-u2) _ARCH="armv7l"; QEMU_BIN=qemu-arm-static;;
-    rpi) _ARCH="armv6l"; QEMU_BIN=qemu-arm-static;;
+    bananapi*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
+    beaglebone*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
+    cubieboard2*|cubietruck*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
+    dockstar*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
+    odroid-u2*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
+    rpi2*) SUBPLATFORM=rpi; QEMU_BIN=qemu-arm-static;;
+    rpi*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
+    usbarmory*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
+    i686*) QEMU_BIN=qemu-i386-static;;
+    x86_64*) QEMU_BIN=qemu-x86_64-static;;
     *) die "$PROGNAME: invalid platform!";;
 esac
 
@@ -143,7 +168,9 @@ for f in chroot tar xbps-install xbps-reconfigure xbps-query; do
         die "$f binary is missing in your system, exiting."
     fi
 done
-
+if ! $QEMU_BIN -version >/dev/null 2>&1; then
+    die "$QEMU_BIN binary is missing in your system, exiting."
+fi
 #
 # Check if package base-system is available.
 #
@@ -156,7 +183,10 @@ run_cmd_target "xbps-query -R -r $rootfs $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REP
 
 chmod 755 $rootfs
 
-PKGS="${PKGBASE} ${PLATFORM}-base"
+case "$PLATFORM" in
+    i686*|x86_64*) PKGS="${PKGBASE} grub" ;;
+    *) PKGS="${PKGBASE} ${SUBPLATFORM}-base" ;;
+esac
 [ -n "$EXTRA_PKGS" ] && PKGS="${PKGS} ${EXTRA_PKGS}"
 
 mount_pseudofs
@@ -166,8 +196,10 @@ mount_pseudofs
 run_cmd_target "xbps-install -S $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $rootfs -y ${PKGS}"
 
 # Enable en_US.UTF-8 locale and generate it into the target rootfs.
-LOCALE=en_US.UTF-8
-sed -e "s/\#\(${LOCALE}.*\)/\1/g" -i $rootfs/etc/default/libc-locales
+if [ -e $rootfs/etc/default/libc-locales ]; then
+    LOCALE=en_US.UTF-8
+    sed -e "s/\#\(${LOCALE}.*\)/\1/g" -i $rootfs/etc/default/libc-locales
+fi
 
 #
 # Reconfigure packages for target architecture: must be reconfigured
@@ -175,19 +207,19 @@ sed -e "s/\#\(${LOCALE}.*\)/\1/g" -i $rootfs/etc/default/libc-locales
 #
 if [ -n "${_ARCH}" ]; then
     info_msg "Reconfiguring packages for ${_ARCH} ..."
-    register_binfmt
-    run_cmd "xbps-reconfigure -r $rootfs base-directories"
-    run_cmd "chroot $rootfs xbps-reconfigure shadow"
-    if [ "$PKGBASE" = "base-system-systemd" ]; then
-        run_cmd "chroot $rootfs xbps-reconfigure systemd"
-    fi
+    case "$PLATFORM" in
+        i686*|x86_64*)
+            run_cmd "XBPS_ARCH=$_ARCH xbps-reconfigure -r $rootfs base-files"
+            ;;
+        *)
+            register_binfmt
+            run_cmd "xbps-reconfigure -r $rootfs base-files"
+            run_cmd "chroot $rootfs env -i xbps-reconfigure -f base-files"
+            rmdir $rootfs/usr/lib32
+            rm -f $rootfs/lib32 $rootfs/lib64 $rootfs/usr/lib64
+            ;;
+    esac
     run_cmd "chroot $rootfs xbps-reconfigure -a"
-    rmdir $rootfs/usr/lib32
-    rm -f $rootfs/lib32 $rootfs/lib64 $rootfs/usr/lib64
-else
-    if [ "$PKGBASE" = "base-system-systemd" ]; then
-        run_cmd "chroot $rootfs xbps-reconfigure systemd"
-    fi
 fi
 
 #
@@ -211,8 +243,8 @@ if [ -n "${_ARCH}" ]; then
 fi
 
 tarball=void-${PLATFORM}-rootfs-$(date '+%Y%m%d').tar.xz
+run_cmd "tar -cp --posix -C $rootfs . | xz -T0 -9 > $tarball "
 
-run_cmd "tar cp -C $rootfs . | xz -9 > $tarball"
 rm -rf $rootfs
 
 info_msg "Successfully created $tarball ($PLATFORM)"

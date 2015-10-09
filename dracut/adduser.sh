@@ -6,8 +6,10 @@ type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
 
 echo hrmpf > ${NEWROOT}/etc/hostname
 
+AUTOLOGIN=$(getarg live.autologin)
 USERNAME=$(getarg live.user)
 USERSHELL=$(getarg live.shell)
+
 [ -z "$USERNAME" ] && USERNAME=anon
 [ -x $NEWROOT/bin/bash -a -z "$USERSHELL" ] && USERSHELL=/bin/bash
 [ -z "$USERSHELL" ] && USERSHELL=/bin/sh
@@ -21,7 +23,7 @@ if ! grep -q ${USERSHELL} ${NEWROOT}/etc/shells ; then
 fi
 
 # Create new user and remove password. We'll use autologin by default.
-chroot ${NEWROOT} useradd -m -c $USERNAME -G wheel -s $USERSHELL $USERNAME
+chroot ${NEWROOT} useradd -m -c $USERNAME -G audio,video,wheel -s $USERSHELL $USERNAME
 chroot ${NEWROOT} passwd -d $USERNAME >/dev/null 2>&1
 
 # Setup default root/user password (voidlinux).
@@ -47,6 +49,10 @@ polkit.addRule(function(action, subject) {
 });
 _EOF
     chroot ${NEWROOT} chown polkitd:polkitd /etc/polkit-1/rules.d/void-live.rules
+fi
+
+if [ -n "$AUTOLOGIN" ]; then
+        sed -i "s,GETTY_ARGS=\"--noclear\",GETTY_ARGS=\"--noclear -a $USERNAME\",g" ${NEWROOT}/etc/sv/agetty-tty1/run
 fi
 
 chroot ${NEWROOT} usermod -s /bin/bash root
