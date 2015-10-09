@@ -11,19 +11,6 @@ for f in ${SERVICES}; do
         ln -sf /etc/sv/$f $NEWROOT/etc/runit/runsvdir/default/
 done
 
-dhcpcd=1
-for f in connmand NetworkManager wicd; do
-    if [ -e $SERVICEDIR/$f ]; then
-        unset dhcpcd
-    fi
-done
-
-# Enable all services by default... with some exceptions.
-for f in $SERVICEDIR/*; do
-    _service=${f##*/}
-    case "${_service}" in
-        agetty-console|agetty-generic|agetty-serial|agetty-tty[SAU]*|sulogin|dhcpcd-*|iptables|ip6tables|wpa_supplicant|pulseaudio|lvmetad|dmeventd|mdadm) ;; # ignored
-        dhcpcd) [ -n "$dhcpcd" ] && ln -sf ${f##$NEWROOT} $NEWROOT/etc/runit/runsvdir/default/;;
-        *) ln -sf ${f##$NEWROOT} $NEWROOT/etc/runit/runsvdir/default/;;
-    esac
+for f in acpid dhcpcd gpm sshd udevd; do
+        ln -sf /etc/sv/$f $NEWROOT/etc/runit/runsvdir/default/
 done
