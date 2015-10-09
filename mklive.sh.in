@@ -76,6 +76,7 @@ Options:
  -C "cmdline args"  Add additional kernel command line arguments.
  -T "title"         Modify the bootloader title.
  -K                 Do not remove builddir.
+ -B <file>          Add file to /boot
 
 The $PROGNAME script generates a live image of the Void Linux distribution.
 This ISO image can be written to a CD/DVD-ROM or any USB stick.
@@ -151,6 +152,9 @@ generate_initramfs() {
     mv $ROOTFS/boot/initrd $BOOT_DIR
     cp $ROOTFS/boot/vmlinuz-$KERNELVERSION $BOOT_DIR/vmlinuz
     cp $ROOTFS/boot/memtest86+ $BOOT_DIR
+    if [ "$BOOT_FILES" ]; then
+        cp $BOOT_FILES $BOOT_DIR
+    fi
 }
 
 cleanup_rootfs() {
@@ -267,14 +271,16 @@ generate_iso_image() {
         -output "$CURDIR/$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
 }
 
+BOOT_FILES=
 XBPS_REPOSITORY=
 #
 # main()
 #
-while getopts "a:b:r:c:C:T:Kk:l:i:s:S:o:p:h" opt; do
+while getopts "a:b:B:r:c:C:T:Kk:l:i:s:S:o:p:h" opt; do
     case $opt in
         a) BASE_ARCH="$OPTARG";;
         b) BASE_SYSTEM_PKG="$OPTARG";;
+        B) BOOT_FILES="$BOOT_FILES $OPTARG";;
         r) XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=$OPTARG ";;
         c) XBPS_CACHEDIR="--cachedir=$OPTARG";;
         K) readonly KEEP_BUILDDIR=1;;
