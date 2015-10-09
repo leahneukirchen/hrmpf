@@ -8,12 +8,12 @@ MENU AUTOBOOT BIOS default device boot in # second{,s}...
 MENU BACKGROUND @@SPLASHIMAGE@@
 MENU WIDTH 78
 MENU MARGIN 1
-MENU ROWS 4
+MENU ROWS 8
 MENU VSHIFT 2
-MENU TIMEOUTROW 8
+MENU TIMEOUTROW 12
 MENU TABMSGROW 2
-MENU CMDLINEROW 11
-MENU HELPMSGROW 16
+MENU CMDLINEROW 15
+MENU HELPMSGROW 21
 MENU HELPMSGENDROW 29
 
 MENU COLOR title        * #FF5255FF *
@@ -31,6 +31,21 @@ APPEND initrd=/boot/initrd root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luk
 LABEL memtest86+
 MENU LABEL memtest86+
 KERNEL /boot/memtest86+
+LABEL mhdd32
+MENU LABEL MHDD32 v4.6 Hard Drive Analysis Tool
+KERNEL memdisk
+INITRD /boot/mhdd32ver4.6.iso
+APPEND iso
+LABEL ipxe
+MENU LABEL iPXE
+KERNEL memdisk
+INITRD /boot/ipxe.iso
+APPEND iso
+LABEL balder
+MENU LABEL Balder10 FreeDOS
+KERNEL memdisk
+INITRD /boot/balder10.img
+APPEND raw
 LABEL c
 MENU LABEL Boot first HD found by BIOS
 COM32 chain.c32
