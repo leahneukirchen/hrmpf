@@ -27,7 +27,6 @@ cdrtools
 cksfv
 cpio
 cpuburn
-cpufrequtils
 cpupower
 cronie
 cryptsetup
@@ -40,6 +39,7 @@ daemonize
 dar
 dash
 dateutils
+db
 ddate
 ddclient
 ddrescue
@@ -81,7 +81,6 @@ extundelete
 fastd
 fatrace
 fbset
-fbterm
 fdupes
 file
 findutils
@@ -98,7 +97,6 @@ gdb
 gettext
 git
 git-perl
-git-svn
 glibc-devel
 gnupg
 gnupg2
@@ -119,7 +117,6 @@ horst
 hostapd
 ht
 htop
-httpie
 ifenslave
 iftop
 inetutils-ftp
@@ -147,7 +144,6 @@ kbd
 kbd-data
 kexec-tools
 kpartx
-kpcli
 ksh
 less
 lftp
@@ -158,6 +154,7 @@ lilo
 linux-firmware
 lm_sensors
 logrotate
+lrzip
 lshw
 lsof
 ltrace
@@ -179,7 +176,6 @@ miller
 mksh
 mmv
 mosh
-most
 mpg123
 ms-sys
 msmtp
@@ -194,6 +190,7 @@ ncdu
 ndisc6
 net-snmp
 net-tools
+nethogs
 nfs-utils
 nftables
 ngrep
@@ -237,11 +234,11 @@ ppp
 pptpclient
 privoxy
 procmail
-profanity
 pv
 pwgen
 python
 radvd
+ranger
 rc
 rcs
 rdfind
@@ -257,8 +254,6 @@ rsnapshot
 rsync
 rsyslog
 rtorrent
-ruby
-runit-kdump
 s-nail
 s3cmd
 s3fs-fuse
@@ -273,7 +268,6 @@ shorewall
 shorewall6
 simple-mtpfs
 sleuthkit
-slrn
 slurm
 smartmontools
 sndio
@@ -283,7 +277,6 @@ ssdeep
 sslscan
 strace
 stunnel
-subversion
 sudo
 sysfsutils
 syslinux
@@ -299,9 +292,9 @@ tin
 tlsdate
 tmux
 tor
-trace-cmd
 traceroute
 tree
+trn
 tweak
 unbound
 unison
@@ -318,6 +311,7 @@ w3m
 which
 whois
 wireless_tools
+wireshark
 wol
 wpa_supplicant
 wvdial
