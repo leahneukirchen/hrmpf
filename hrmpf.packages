@@ -57,12 +57,15 @@ dosfstools
 dpkg
 dstat
 duff
+dumpet
 duplicity
 dwdiff
 e2fsprogs
 ebtables
 ed
 edbrowse
+efibootmgr
+efivar
 efmd
 eject
 elinks
@@ -103,6 +106,9 @@ gpm
 gptfdisk
 grep
 grub
+grub-i386-efi
+grub-x86_64-efi
+gummiboot
 gzip
 haveged
 hdapsd
@@ -175,6 +181,7 @@ mmv
 mosh
 most
 mpg123
+ms-sys
 msmtp
 msrc_base
 mt-st
@@ -303,6 +310,7 @@ unzip
 usbutils
 util-linux
 vbindiff
+vboot-utils
 vde2
 vim
 vpnc
