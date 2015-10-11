@@ -49,6 +49,7 @@ dhex
 di
 dialog
 diffutils
+dmidecode
 dmraid
 dnsmap
 dnsmasq
@@ -85,6 +86,7 @@ fdupes
 file
 findutils
 firejail
+flashrom
 flex
 foremost
 fping
@@ -147,6 +149,7 @@ kpartx
 ksh
 less
 lftp
+libao-sndio
 liboping
 libressl-openssl
 libtool
@@ -190,6 +193,7 @@ ncdu
 ndisc6
 net-snmp
 net-tools
+nethack
 nethogs
 nfs-utils
 nftables
@@ -306,6 +310,7 @@ vbindiff
 vboot-utils
 vde2
 vim
+vorbis-tools
 vpnc
 w3m
 which
