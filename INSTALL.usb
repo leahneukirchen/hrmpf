@@ -1,0 +1,14 @@
+# Rough steps to install on USB with a FAT partition, from a booted ISO:
+
+We assume /dev/sda is the USB stick.
+
+	fdisk /dev/sda
+	mkfs.vfat -n VOID_LIVE
+	mount /dev/sda1 /mnt
+	rsync -avP -x /run/initramfs/live/ /mnt/
+	syslinux -d boot -i /dev/sda1
+	mkdir /mnt/boot/syslinux
+	mv /mnt/boot/isolinux /mnt/boot/syslinux
+	mv /mnt/boot/syslinux/isolinux.cfg /mnt/boot/syslinux/syslinux.cfg
+	dd if=/usr/lib/syslinux/bios/mbr.bin of=/dev/sda conv=notrunc
+
