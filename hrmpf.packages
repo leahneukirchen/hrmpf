@@ -39,7 +39,6 @@ cryptsetup
 csync
 csync2
 curl
-cv
 cvs
 daemonize
 dar
@@ -254,6 +253,7 @@ ppp
 pptpclient
 privoxy
 procmail
+progress
 pv
 pwgen
 python
