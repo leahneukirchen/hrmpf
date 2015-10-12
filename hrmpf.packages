@@ -61,9 +61,11 @@ dos2unix
 dosfstools
 dpkg
 dstat
+dtach
 duff
 dumpet
 duplicity
+dvtm
 dwdiff
 e2fsprogs
 ebtables
@@ -125,6 +127,7 @@ ht
 htop
 ifenslave
 iftop
+ii
 inetutils-ftp
 inetutils-inetd
 inetutils-talk
@@ -140,6 +143,7 @@ ipset
 iptables
 iptraf-ng
 iputils
+ired
 irqbalance
 irssi
 iw
@@ -255,6 +259,7 @@ redo
 reptyr
 rfkill
 rkhunter
+rlwrap
 rng-tools
 rpcbind
 rpmextract
@@ -274,6 +279,7 @@ sg3_utils
 sharutils
 shorewall
 shorewall6
+sic
 simple-mtpfs
 sleuthkit
 slurm
@@ -290,6 +296,7 @@ sysfsutils
 syslinux
 sysstat
 tar
+tc-play
 tcpdump
 tcsh
 testdisk
