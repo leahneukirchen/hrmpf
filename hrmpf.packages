@@ -7,6 +7,7 @@ at
 attr
 autoconf
 automake
+autossh
 bc
 biew
 bind-utils
@@ -29,6 +30,7 @@ cmus
 cmus-flac
 cmus-libao
 cmus-mpc
+colordiff
 cpio
 cpuburn
 cpupower
@@ -155,6 +157,7 @@ kbd-data
 kexec-tools
 kpartx
 ksh
+ldns
 less
 lftp
 libao-sndio
@@ -180,7 +183,6 @@ mc
 mcabber
 mcelog
 mdadm
-memtest86+
 mercurial
 mg
 miller
@@ -197,6 +199,8 @@ mtr
 mtree
 multitail
 mutt
+nano
+nbd
 ncdu
 ndisc6
 net-snmp
@@ -205,6 +209,7 @@ nethack
 nethogs
 nfs-utils
 nftables
+nginx
 ngrep
 nmap
 nmon
@@ -223,6 +228,9 @@ openvpn
 oue
 outils
 p7zip
+par
+par2cmdline
+parallel
 partclone
 parted
 passwdqc
@@ -272,6 +280,7 @@ s3cmd
 s3fs-fuse
 samba
 sample
+schedtool
 schroot
 screen
 sdparm
@@ -286,12 +295,14 @@ slurm
 smartmontools
 sndio
 socat
+socklog-void
 squashfs-tools
 ssdeep
 sslscan
 strace
 stunnel
 sudo
+swaks
 sysfsutils
 syslinux
 sysstat
@@ -324,6 +335,8 @@ vim
 vorbis-tools
 vpnc
 w3m
+wavemon
+wgetpaste
 which
 whois
 wireless_tools
