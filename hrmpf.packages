@@ -9,6 +9,7 @@ autoconf
 automake
 autossh
 bc
+beep
 biew
 bind-utils
 binutils
@@ -147,6 +148,7 @@ irqbalance
 irssi
 iw
 jfsutils
+jhead
 john
 jupp
 kbd
