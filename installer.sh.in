@@ -1,6 +1,6 @@
 #!/bin/sh
 #-
-# Copyright (c) 2012-2014 Juan Romero Pardines <xtraeme@gmail.com>.
+# Copyright (c) 2012-2015 Juan Romero Pardines <xtraeme@voidlinux.eu>.
 #               2012 Dave Elusive <davehome@redthumb.info.tm>.
 # All rights reserved.
 #
@@ -36,7 +36,6 @@ BOOTLOADER_DONE=
 PARTITIONS_DONE=
 NETWORK_DONE=
 FILESYSTEMS_DONE=
-SYSTEMD_INIT=
 
 TARGETDIR=/mnt/target
 LOG=/dev/tty8
@@ -57,11 +56,6 @@ fi
 # Detect if this is an EFI system.
 if [ -e /sys/firmware/efi/systab ]; then
     EFI_SYSTEM=1
-fi
-
-# Detect if systemd is installed
-if [ "$(cat /proc/1/comm)" = "systemd" ]; then
-    SYSTEMD_INIT=1
 fi
 
 # dialog colors
@@ -141,6 +135,14 @@ show_disks() {
         gbytes="$(($size * $sectorsize / 1024 / 1024 / 1024))"
         echo "size:${gbytes}GB;sector_size:$sectorsize"
     done
+    # cciss(4) devices
+    for dev in $(ls /dev/cciss|grep -E 'c[0-9]d[0-9]$'); do
+        echo "/dev/cciss/$dev"
+        size=$(cat /sys/block/cciss\!$dev/size)
+        sectorsize=$(cat /sys/block/cciss\!$dev/queue/hw_sector_size)
+        gbytes="$(($size * $sectorsize / 1024 / 1024 / 1024))"
+        echo "size:${gbytes}GB;sector_size:$sectorsize"
+    done
 }
 
 show_partitions() {
@@ -175,6 +177,15 @@ show_partitions() {
             echo "$p"
             echo "size:${fssize:-unknown};fstype:${fstype:-none}"
         fi
+    done
+    # cciss(4) devices
+    for part in $(ls /dev/cciss|grep -E 'c[0-9]d[0-9]p[0-9]+'); do
+        fstype=$(lsblk -nfr /dev/cciss/$part|awk '{print $2}')
+        [ "$fstype" = "crypto_LUKS" ] && continue
+        [ "$fstype" = "LVM2_member" ] && continue
+        fssize=$(lsblk -nr /dev/cciss/$part|awk '{print $4}')
+        echo "/dev/cciss/$part"
+        echo "size:${fssize:-unknown};fstype:${fstype:-none}"
     done
     if [ -e /sbin/lvs ]; then
         # LVM
@@ -231,7 +242,10 @@ menu_filesystems() {
         set -- "$fstype" "$fssize" "$mntpoint" "$reformat"
         if [ -n "$1" -a -n "$2" -a -n "$3" -a -n "$4" ]; then
             local bdev=$(basename $dev)
-            if grep -Eq "^MOUNTPOINT \/dev\/${bdev}.*" $CONF_FILE; then
+            local ddev=$(basename $(dirname $dev))
+            if [ "$ddev" != "dev" ]; then
+                sed -i -e "/^MOUNTPOINT \/dev\/${ddev}\/${bdev}.*/d" $CONF_FILE
+            else
                 sed -i -e "/^MOUNTPOINT \/dev\/${bdev}.*/d" $CONF_FILE
             fi
             echo "MOUNTPOINT $dev $1 $2 $3 $4" >>$CONF_FILE
@@ -270,11 +284,7 @@ ${RESET}\n" 18 80
 }
 
 menu_keymap() {
-    if [ -n "$SYSTEMD_INIT" ]; then
-        local _keymaps="$(localectl --no-pager list-keymaps)"
-    else
-        local _keymaps="$(find /usr/share/kbd/keymaps/ -type f -iname "*.map.gz" -printf "%f\n" | sed 's|.map.gz||g' | sort)"
-    fi
+    local _keymaps="$(find /usr/share/kbd/keymaps/ -type f -iname "*.map.gz" -printf "%f\n" | sed 's|.map.gz||g' | sort)"
     local _KEYMAPS=
 
     for f in ${_keymaps}; do
@@ -334,11 +344,7 @@ set_locale() {
 }
 
 menu_timezone() {
-    if [ -n "$SYSTEMD_INIT" ]; then
-        local _tzones="$(timedatectl --no-pager list-timezones)"
-    else
-        local _tzones="$(cd /usr/share/zoneinfo; find Africa/ America/ Antarctica/ Arctic/ Asia/ Atlantic/ Australia/ Europe/ Indian/ Pacific/ -type f | sort)"
-    fi
+    local _tzones="$(cd /usr/share/zoneinfo; find Africa/ America/ Antarctica/ Arctic/ Asia/ Atlantic/ Australia/ Europe/ Indian/ Pacific/ -type f | sort)"
     local _TIMEZONES=
 
     for f in ${_tzones}; do
@@ -359,11 +365,7 @@ menu_timezone() {
 set_timezone() {
     local TIMEZONE="$(get_option TIMEZONE)"
 
-    if [ -z "$SYSTEMD_INIT" ]; then
-        sed -i -e "s|#TIMEZONE=.*|TIMEZONE=$TIMEZONE|g" $TARGETDIR/etc/rc.conf
-    else
-        ln -sf /usr/share/zoneinfo/${TIMEZONE} $TARGETDIR/etc/localtime
-    fi
+    sed -i -e "s|#TIMEZONE=.*|TIMEZONE=$TIMEZONE|g" $TARGETDIR/etc/rc.conf
 }
 
 menu_hostname() {
@@ -810,11 +812,7 @@ install_packages() {
 }
 
 enable_dhcpd() {
-    if [ -n "$SYSTEMD_INIT" ]; then
-        chroot $TARGETDIR systemctl enable dhcpcd.service >$LOG 2>&1
-    else
-        ln -s /etc/sv/dhcpcd $TARGETDIR/etc/runit/runsvdir/default/dhcpcd
-    fi
+    ln -sf /etc/sv/dhcpcd $TARGETDIR/etc/runit/runsvdir/default/dhcpcd
 }
 
 menu_install() {
@@ -858,6 +856,7 @@ ${BOLD}Do you want to continue?${RESET}" 20 80 || return
         # Remove live user.
         echo "Removing $USERNAME live user from targetdir ..." >$LOG
         chroot $TARGETDIR userdel -r $USERNAME >$LOG 2>&1
+        sed -i -e "/$USERNAME ALL=.*/d" $TARGETDIR/etc/sudoers
         DIALOG --title "Check $LOG for details" \
             --infobox "Rebuilding initramfs for target ..." 4 60
         echo "Rebuilding initramfs for target ..." >$LOG
@@ -905,11 +904,7 @@ ${BOLD}Do you want to continue?${RESET}" 20 80 || return
         elif [ "$_type" = "dhcp" ]; then
             if [ -f /etc/wpa_supplicant/wpa_supplicant-${_dev}.conf ]; then
                 cp /etc/wpa_supplicant/wpa_supplicant-${_dev}.conf $TARGETDIR/etc/wpa_supplicant
-                if [ -n "$SYSTEMD_INIT" ]; then
-                    chroot $TARGETDIR systemctl enable dhcpcd@${_dev}.service >$LOG 2>&1
-                else
-                    ln -s /etc/sv/dhcpcd-${_dev} $TARGETDIR/etc/runit/runsvdir/default/dhcpcd-${_dev}
-                fi
+                ln -sf /etc/sv/dhcpcd-${_dev} $TARGETDIR/etc/runit/runsvdir/default/dhcpcd-${_dev}
             else
                 enable_dhcpd
             fi
