@@ -4,6 +4,7 @@ alsa-lib
 alsa-utils
 apg
 at
+atop
 attr
 autoconf
 automake
@@ -34,7 +35,9 @@ cmus-mpc
 colordiff
 cpio
 cpuburn
+cpulimit
 cpupower
+crda
 cronie
 cryptsetup
 csync
@@ -50,6 +53,7 @@ ddate
 ddclient
 ddrescue
 debootstrap
+detox
 dhcpcd
 dhex
 di
@@ -81,6 +85,8 @@ ent
 entr
 es
 ethtool
+ettercap
+execline
 exfat-utils
 ext4magic
 extrace
@@ -154,6 +160,7 @@ jupp
 kbd
 kbd-data
 kexec-tools
+keyutils
 kpartx
 ksh
 ldns
@@ -161,13 +168,14 @@ less
 lftp
 libao-sndio
 liboping
-libressl-openssl
+libressl
 libtool
 lilo
 linux-firmware
 lm_sensors
 logrotate
 lrzip
+lrzsz
 lshw
 lsof
 ltrace
@@ -183,8 +191,11 @@ mcabber
 mcelog
 mdadm
 mercurial
+metalog
 mg
 miller
+miniupnpc
+miruo
 mksh
 mmv
 mosh
@@ -219,6 +230,7 @@ ntp
 numactl
 nvi
 nwipe
+odo
 open-iscsi
 openbsd-netcat
 opensmtpd
@@ -237,6 +249,7 @@ patch
 pax
 pax-utils
 pbzip2
+pchar
 pciutils
 perl
 pev
@@ -247,6 +260,8 @@ pixz
 pkg-config
 pm-utils
 pmr
+polipo
+polysh
 posh
 powertop
 ppp
@@ -278,10 +293,13 @@ rtorrent
 s-nail
 s3cmd
 s3fs-fuse
-samba
+s6
+s6-dns
+s6-networking
 sample
 schedtool
 screen
+scrypt
 sdparm
 sg3_utils
 sharutils
@@ -313,13 +331,17 @@ testdisk
 texinfo
 tftp-hpa
 tgt
+the_silver_searcher
+time
 tin
+tiptop
 tlsdate
 tmux
 tor
 traceroute
 tree
 trn
+ttyrec
 tweak
 unbound
 unison
@@ -339,7 +361,6 @@ wgetpaste
 which
 whois
 wireless_tools
-wireshark
 wol
 wpa_supplicant
 wvdial
