@@ -359,6 +359,7 @@ sndio
 vorbis-tools
 
 # backup
+attic
 csync
 csync2
 dar
