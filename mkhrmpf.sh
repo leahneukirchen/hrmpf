@@ -10,4 +10,4 @@
 	-B extra/mhdd32ver4.6.iso \
 	-B extra/ipxe.iso \
 	-B extra/memtest86+-5.01.iso \
-	-p "$(cat hrmpf.packages)"
+	-p "$(grep '^[^#].' hrmpf.packages)"
