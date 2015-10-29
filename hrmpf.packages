@@ -35,18 +35,14 @@ bwm-ng
 bridge-utils
 ddclient
 dhcpcd
-dnsmasq
 ebtables
 ethtool
-ettercap
-fastd
 fping
 horst
 hostapd
 ifenslave
 iftop
 inetutils-ftp
-inetutils-inetd
 inetutils-talk
 inetutils-telnet
 iodine
@@ -70,26 +66,19 @@ net-snmp
 net-tools
 nfs-utils
 nftables
-nginx
 ngrep
 nmon
-nsd
 ntp
 openbsd-netcat
-opensmtpd
 openssh
-openvpn
 pchar
-polipo
 polysh
 ppp
 pptpclient
-privoxy
 procmail
 radvd
 rfkill
 rpcbind
-rsyslog
 s6-dns
 s6-networking
 shorewall
@@ -98,11 +87,9 @@ slurm
 socat
 swaks
 tcpdump
-tftp-hpa
 tlsdate
 tor
 traceroute
-unbound
 vde2
 vpnc
 wavemon
@@ -111,7 +98,6 @@ wireless_tools
 wol
 wpa_supplicant
 wvdial
-xinetd
 
 # general system tools
 alsa-lib
@@ -195,7 +181,6 @@ sample
 schedtool
 screen
 socklog-void
-stunnel
 sudo
 the_silver_searcher
 time
@@ -290,6 +275,7 @@ zpaq
 apg
 dnsmap
 ent
+ettercap
 gnupg
 gnupg2
 haveged
@@ -405,3 +391,20 @@ sic
 tin
 trn
 w3m
+
+# servers
+dnsmasq
+fastd
+inetutils-inetd
+nginx
+nsd
+opensmtpd
+openvpn
+polipo
+privoxy
+rsyslog
+stunnel
+tftp-hpa
+unbound
+xinetd
+
