@@ -1,3 +1,4 @@
+- syslog to tty12
 - forensic mode (don't touch disks)
 - hrmpf96 (64+32 image, best in the same squashfs and switch_root into
   bindmount)
