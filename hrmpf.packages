@@ -269,7 +269,6 @@ unrar
 unzip
 xz
 zip
-zpaq
 
 # security
 apg
@@ -356,6 +355,7 @@ rsnapshot
 rsync
 unison
 zbackup
+zpaq
 
 # shells
 dash
