@@ -128,6 +128,10 @@ install_packages() {
     chroot $ROOTFS env -i xbps-reconfigure -a
 
     xbps-query -r $ROOTFS -l >installed.pkgs
+    xbps-alternatives -r $ROOTFS -s dash
+    xbps-alternatives -r $ROOTFS -s inetutils-hostname
+    xbps-alternatives -r $ROOTFS -s ex-vi
+    xbps-alternatives -r $ROOTFS -l >installed.alternatives
 
     if [ -x installer.sh ]; then
         install -Dm755 installer.sh $ROOTFS/usr/sbin/void-installer
