@@ -43,6 +43,7 @@ hostapd
 ifenslave
 iftop
 inetutils-ftp
+inetutils-hostname
 inetutils-talk
 inetutils-telnet
 iodine
@@ -145,9 +146,11 @@ kbd-data
 kexec-tools
 less
 linux-firmware
-lrzsz
 logrotate
+lr
+lrzsz
 lxc
+mawk
 mbuffer
 mc
 metalog
@@ -190,6 +193,7 @@ ttyrec
 util-linux
 wgetpaste
 which
+xe
 xjobs
 xmlstarlet
 xtools
@@ -370,6 +374,7 @@ zsh
 # text editors
 ed
 emacs
+ex-vi
 jupp
 mg
 nano
