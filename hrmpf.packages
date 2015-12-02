@@ -132,6 +132,7 @@ efmd
 entr
 execline
 fbset
+fbgrab
 fdupes
 file
 findutils
@@ -321,6 +322,8 @@ biew
 ddrescue
 dhex
 extundelete
+fbv
+fbpdf
 flashrom
 foremost
 ht
@@ -388,6 +391,7 @@ ii
 irssi
 lftp
 lynx
+links
 mcabber
 mutt
 rtorrent
