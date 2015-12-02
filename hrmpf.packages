@@ -285,6 +285,7 @@ gnupg2
 haveged
 john
 keyutils
+kismet
 libressl
 nmap
 passwdqc
