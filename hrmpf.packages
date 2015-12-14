@@ -131,8 +131,8 @@ dvtm
 efmd
 entr
 execline
-fbset
 fbgrab
+fbset
 fdupes
 file
 findutils
@@ -156,10 +156,12 @@ mbuffer
 mc
 metalog
 miller
+minised
 mmv
 msrc_base
 multitail
 ncdu
+nocache
 nq
 numactl
 odo
@@ -319,6 +321,7 @@ redo
 texinfo
 
 # rescue & forensics
+antiword
 biew
 ddrescue
 dhex
