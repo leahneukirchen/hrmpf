@@ -1,6 +1,7 @@
 # diagnosis
 acpi
 atop
+blktrace
 bonnie++
 cpuburn
 dmidecode
@@ -11,6 +12,7 @@ hdapsd
 hddtemp
 htop
 ioping
+ioprof
 iotop
 lm_sensors
 lshw
@@ -361,6 +363,7 @@ csync2
 dar
 duplicity
 mt-st
+rdiff-backup
 rdumpfs
 rsnapshot
 rsync
