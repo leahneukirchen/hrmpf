@@ -26,6 +26,7 @@ smartmontools
 strace
 sysstat
 tiptop
+tpm-tools
 usbutils
 
 # networking
@@ -44,6 +45,7 @@ horst
 hostapd
 ifenslave
 iftop
+inadyn
 inetutils-ftp
 inetutils-hostname
 inetutils-talk
@@ -51,6 +53,7 @@ inetutils-telnet
 iodine
 ipcalc
 iperf
+iprange
 iproute2
 ipset
 iptables
@@ -134,6 +137,7 @@ dvtm
 efmd
 entr
 execline
+faketime
 fbgrab
 fbset
 fdupes
@@ -141,6 +145,7 @@ file
 findutils
 firejail
 gawk
+gcal
 gpm
 grep
 inotify-tools
@@ -189,6 +194,8 @@ s6
 sample
 schedtool
 screen
+sispmctl
+snooze
 socklog-void
 sudo
 the_silver_searcher
@@ -264,6 +271,7 @@ cksfv
 cpio
 dpkg
 gzip
+lbzip2
 lrzip
 lzop
 p7zip
@@ -394,6 +402,7 @@ mg
 nano
 nvi
 vim
+vis
 
 # clients
 edbrowse
@@ -401,8 +410,8 @@ elinks
 ii
 irssi
 lftp
-lynx
 links
+lynx
 mcabber
 mutt
 rtorrent
