@@ -100,7 +100,7 @@ copy_dracut_files() {
 
 install_prereqs() {
     copy_void_conf $VOIDHOSTDIR
-    $XBPS_INSTALL_CMD -r $VOIDHOSTDIR $XBPS_REPOSITORY \
+    XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r $VOIDHOSTDIR $XBPS_REPOSITORY \
         $XBPS_HOST_CACHEDIR -y ${REQUIRED_PKGS}
     [ $? -ne 0 ] && die "Failed to install required software, exiting..."
 }
@@ -211,7 +211,7 @@ generate_grub_efi_boot() {
     modprobe -q loop || :
 
     # Create EFI vfat image.
-    dd if=/dev/zero of=$GRUB_DIR/efiboot.img bs=1024 count=4096  >/dev/null 2>&1
+    truncate -s 16M $GRUB_DIR/efiboot.img >/dev/null 2>&1
     mkfs.vfat -F12 -S 512 -n "grub_uefi" "$GRUB_DIR/efiboot.img" >/dev/null 2>&1
 
     GRUB_EFI_TMPDIR="$(mktemp --tmpdir=$HOME -d)"
@@ -223,7 +223,7 @@ generate_grub_efi_boot() {
 	xbps-uchroot $VOIDHOSTDIR grub-mkstandalone -- \
 		     --directory="/usr/lib/grub/i386-efi" \
 		     --format="i386-efi" \
-		     --compression="xz" --output="/tmp/bootia32.efi" \
+		     --output="/tmp/bootia32.efi" \
 		     "boot/grub/grub.cfg"
 	if [ $? -ne 0 ]; then
             umount "$GRUB_EFI_TMPDIR"
@@ -236,7 +236,7 @@ generate_grub_efi_boot() {
 	xbps-uchroot $VOIDHOSTDIR grub-mkstandalone -- \
 		     --directory="/usr/lib/grub/x86_64-efi" \
 		     --format="x86_64-efi" \
-		     --compression="xz" --output="/tmp/bootx64.efi" \
+		     --output="/tmp/bootx64.efi" \
 		     "boot/grub/grub.cfg"
 	if [ $? -ne 0 ]; then
             umount "$GRUB_EFI_TMPDIR"
@@ -260,8 +260,8 @@ generate_squashfs() {
         ROOTFS_FREESIZE="$((ROOTFS_SIZE/6))"
     fi
     mkdir -p "$BUILDDIR/tmp/LiveOS"
-    dd if=/dev/zero of="$BUILDDIR/tmp/LiveOS/ext3fs.img" \
-        bs="$((ROOTFS_SIZE+ROOTFS_FREESIZE))M" count=1 >/dev/null 2>&1
+    truncate -s "$((ROOTFS_SIZE+ROOTFS_FREESIZE))M" \
+	    $BUILDDIR/tmp/LiveOS/ext3fs.img >/dev/null 2>&1
     mkdir -p "$BUILDDIR/tmp-rootfs"
     mkfs.ext3 -F -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" >/dev/null 2>&1
     mount -o loop "$BUILDDIR/tmp/LiveOS/ext3fs.img" "$BUILDDIR/tmp-rootfs"
@@ -318,7 +318,7 @@ shift $((OPTIND - 1))
 
 XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://repo.voidlinux.eu/current --repository=http://muslrepo.voidlinux.eu/current"
 
-ARCH=$(uname -m)
+ARCH=$(xbps-uhelper arch)
 
 # Set defaults
 : ${BASE_ARCH:=$(uname -m)}
@@ -372,7 +372,7 @@ info_msg "[1/8] Synchronizing XBPS repository data..."
 copy_void_keys $ROOTFS
 copy_void_keys $VOIDHOSTDIR
 XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -r $ROOTFS ${XBPS_REPOSITORY} -S
-$XBPS_INSTALL_CMD -r $VOIDHOSTDIR $XBPS_REPOSITORY -S
+XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r $VOIDHOSTDIR $XBPS_REPOSITORY -S
 
 _linux_series=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -x linux|head -1)
 _kver=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -p pkgver ${_linux_series})
