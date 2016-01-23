@@ -361,11 +361,13 @@ cmus
 cmus-flac
 cmus-libao
 cmus-mpc
+crawl
 ddate
 libao-sndio
 mpg123
 nethack
 sndio
+vitetris
 vorbis-tools
 
 # backup
@@ -414,6 +416,7 @@ links
 lynx
 mcabber
 mutt
+ncftp
 rtorrent
 s-nail
 sic
@@ -437,3 +440,7 @@ tftp-hpa
 unbound
 xinetd
 
+# office
+ledger
+sc
+when
