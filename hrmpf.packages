@@ -11,6 +11,7 @@ fatrace
 hdapsd
 hddtemp
 htop
+i2c-tools
 idle3-tools
 ioping
 ioprof
@@ -20,9 +21,11 @@ lshw
 lsof
 ltrace
 mcelog
+msr-tools
 nethogs
 pciutils
 powertop
+read-edid
 smartmontools
 strace
 sysstat
@@ -96,6 +99,7 @@ slurm
 socat
 swaks
 tcpdump
+tcpflow
 tlsdate
 tor
 traceroute
@@ -336,6 +340,7 @@ patch
 pkg-config
 rcs
 redo
+smake
 texinfo
 
 # rescue & forensics
@@ -345,15 +350,17 @@ binwalk
 ddrescue
 dhex
 extundelete
-fbv
 fbpdf
+fbv
 flashrom
 foremost
+hashdeep
 ht
 ired
 jhead
 mtree
 pev
+rhash
 rkhunter
 sleuthkit
 ssdeep
