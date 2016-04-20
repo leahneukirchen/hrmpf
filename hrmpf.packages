@@ -116,6 +116,7 @@ wvdial
 aha
 alsa-lib
 alsa-utils
+ascii
 at
 attr
 bc
@@ -123,6 +124,7 @@ beep
 busybox
 byobu
 cdrtools
+cmark
 colordiff
 cpulimit
 cpupower
@@ -155,8 +157,10 @@ gawk
 gcal
 gpm
 grep
+hostmux
 inotify-tools
 irqbalance
+jo
 kbd
 kbd-data
 kexec-tools
@@ -193,6 +197,7 @@ pmr
 progress
 pv
 python
+quota
 ranger
 rdfind
 reptyr
@@ -309,6 +314,7 @@ john
 keyutils
 kismet
 libressl
+minisign
 nmap
 p0f
 passwdqc
@@ -324,6 +330,7 @@ autoconf
 automake
 binutils
 bison
+cpanminus
 cvs
 flex
 gcc
@@ -384,6 +391,11 @@ vorbis-tools
 
 # backup
 attic
+backupninja
+burp-client
+burp-server
+burp2-client
+burp2-server
 csync
 csync2
 dar
@@ -393,6 +405,7 @@ rdiff-backup
 rdumpfs
 rsnapshot
 rsync
+snapraid
 unison
 zbackup
 zpaq
@@ -402,6 +415,7 @@ dash
 es
 ksh
 mksh
+pdmenu
 posh
 rc
 tcsh
