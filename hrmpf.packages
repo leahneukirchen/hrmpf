@@ -66,8 +66,9 @@ iptraf-ng
 iputils
 iw
 ldns
-liboping
 lft
+liboping
+libressl-netcat
 miniupnpc
 miruo
 mosh

@@ -136,6 +136,7 @@ install_packages() {
     xbps-alternatives -r $ROOTFS -s dash
     xbps-alternatives -r $ROOTFS -s inetutils-hostname
     xbps-alternatives -r $ROOTFS -s ex-vi
+    xbps-alternatives -r $ROOTFS -s libressl-netcat
     xbps-alternatives -r $ROOTFS -l >installed.alternatives
 
     if [ -x installer.sh ]; then
