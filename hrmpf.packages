@@ -321,7 +321,6 @@ passwdqc
 pwgen
 rng-tools
 scrypt
-sslscan
 testssl.sh
 zmap
 
