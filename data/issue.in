@@ -22,5 +22,6 @@ sure to configure your network interface and then use:
 
 	- xbps-install(8) to install/update packages
 	- xbps-query(8) to query for package info
+	- xbps-reconfigure -a to build ZFS modules
 
 Enjoy!
