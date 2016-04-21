@@ -76,6 +76,7 @@ Options:
  -S <freesize>      Allocate this free size (MB) for the rootfs.
  -o <file>          Output file name for the ISO image (auto if unset).
  -p "pkg pkgN ..."  Install additional packages into the ISO image.
+ -U "pkg pkgN ..."  Install additional unconfigured packages into the ISO image.
  -I <includedir>    Include directory structure under given path into rootfs
 
  -C "cmdline args"  Add additional kernel command line arguments.
@@ -138,6 +139,11 @@ install_packages() {
     xbps-alternatives -r $ROOTFS -s ex-vi
     xbps-alternatives -r $ROOTFS -s libressl-netcat
     xbps-alternatives -r $ROOTFS -l >installed.alternatives
+
+    if [ "$UNCONF_PACKAGE_LIST" ]; then
+        XBPS_ARCH=$BASE_ARCH ${XBPS_INSTALL_CMD} -r $ROOTFS \
+            $XBPS_REPOSITORY $XBPS_CACHEDIR -y -U ${UNCONF_PACKAGE_LIST}
+    fi
 
     if [ -x installer.sh ]; then
         install -Dm755 installer.sh $ROOTFS/usr/sbin/void-installer
@@ -304,7 +310,7 @@ generate_iso_image() {
 #
 # main()
 #
-while getopts "a:B:b:r:c:C:T:Kk:l:i:I:s:S:o:p:h" opt; do
+while getopts "a:B:b:r:c:C:T:Kk:l:i:I:s:S:o:p:U:h" opt; do
     case $opt in
         a) BASE_ARCH="$OPTARG";;
         b) BASE_SYSTEM_PKG="$OPTARG";;
@@ -320,6 +326,7 @@ while getopts "a:B:b:r:c:C:T:Kk:l:i:I:s:S:o:p:h" opt; do
         S) ROOTFS_FREESIZE="$OPTARG";;
         o) OUTPUT_FILE="$OPTARG";;
         p) PACKAGE_LIST="$OPTARG";;
+        U) UNCONF_PACKAGE_LIST="$OPTARG";;
         C) BOOT_CMDLINE="$OPTARG";;
         T) BOOT_TITLE="$OPTARG";;
         h) usage;;
