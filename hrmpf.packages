@@ -281,7 +281,6 @@ syslinux
 vboot-utils
 
 # archives
-bsdcpio
 bsdtar
 bzip2
 cabextract
