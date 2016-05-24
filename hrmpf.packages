@@ -263,6 +263,7 @@ tgt
 xfsdump
 xfsprogs
 zerofree
+zfs
 
 # bootloader
 efibootmgr
