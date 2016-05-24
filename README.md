@@ -41,6 +41,7 @@ This project is based on void-mklive.
 
 To build your own:
 
+    % make
     % ./mkhrmpf.sh
     % linux32 ./mkhrmpf.sh
 
