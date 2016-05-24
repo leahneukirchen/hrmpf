@@ -101,6 +101,7 @@ socat
 swaks
 tcpdump
 tcpflow
+tcptrack
 tlsdate
 tor
 traceroute
@@ -154,11 +155,13 @@ fdupes
 file
 findutils
 firejail
+fzy
 gawk
 gcal
 gpm
 grep
 hostmux
+icdiff
 inotify-tools
 irqbalance
 jo
@@ -211,6 +214,7 @@ sispmctl
 snooze
 socklog-void
 sudo
+tab
 the_silver_searcher
 time
 tmux
@@ -354,6 +358,7 @@ texinfo
 antiword
 biew
 binwalk
+bvi
 ddrescue
 dhex
 extundelete
@@ -392,6 +397,8 @@ vorbis-tools
 # backup
 attic
 backupninja
+borg
+bup
 burp-client
 burp-server
 csync
@@ -399,6 +406,7 @@ csync2
 dar
 duplicity
 mt-st
+obnam
 rdiff-backup
 rdumpfs
 rsnapshot
@@ -467,4 +475,5 @@ xinetd
 # office
 ledger
 sc
+sc-im
 when
