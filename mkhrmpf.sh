@@ -11,4 +11,5 @@
 	-B extra/ipxe.iso \
 	-B extra/memtest86+-5.01.iso \
 	-p "$(grep '^[^#].' hrmpf.packages)" \
+	-A "gawk tnftp inetutils-hostname libressl-netcat dash vim-common" \
 	-U "spl zfs"

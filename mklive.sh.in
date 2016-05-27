@@ -66,6 +66,7 @@ Usage: $PROGNAME [options]
 
 Options:
  -a <xbps-arch>     Set XBPS_ARCH (do not use it unless you know what it is)
+ -A "pkg pkgN"      Set xbps-alternatives for packages.
  -b <system-pkg>    Set an alternative base-system package (defaults to base-system).
  -r <repo-url>      Use this XBPS repository (may be specified multiple times).
  -c <cachedir>      Use this XBPS cache directory (/var/cache/xbps if unset).
@@ -134,11 +135,9 @@ install_packages() {
     chroot $ROOTFS env -i xbps-reconfigure -a
 
     xbps-query -r $ROOTFS -l >installed.pkgs
-    xbps-alternatives -r $ROOTFS -s dash
-    xbps-alternatives -r $ROOTFS -s inetutils-hostname
-    xbps-alternatives -r $ROOTFS -s ex-vi
-    xbps-alternatives -r $ROOTFS -s libressl-netcat
-    xbps-alternatives -r $ROOTFS -s tnftp
+    for a in $ALTERNATIVES; do
+        xbps-alternatives -r $ROOTFS -s $a
+    done
     xbps-alternatives -r $ROOTFS -l >installed.alternatives
 
     if [ "$UNCONF_PACKAGE_LIST" ]; then
@@ -311,9 +310,10 @@ generate_iso_image() {
 #
 # main()
 #
-while getopts "a:B:b:r:c:C:T:Kk:l:i:I:s:S:o:p:U:h" opt; do
+while getopts "a:A:B:b:r:c:C:T:Kk:l:i:I:s:S:o:p:U:h" opt; do
     case $opt in
         a) BASE_ARCH="$OPTARG";;
+        A) ALTERNATIVES="$OPTARG";;
         b) BASE_SYSTEM_PKG="$OPTARG";;
         B) BOOT_FILES="$BOOT_FILES $OPTARG";;
         r) XBPS_REPOSITORY="--repository=$OPTARG $XBPS_REPOSITORY";;
