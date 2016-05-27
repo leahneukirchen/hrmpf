@@ -51,10 +51,8 @@ hostapd
 ifenslave
 iftop
 inadyn
-inetutils-ftp
 inetutils-hostname
 inetutils-talk
-inetutils-telnet
 iodine
 ipcalc
 iperf
@@ -441,6 +439,8 @@ vim
 edbrowse
 elinks
 ii
+inetutils-ftp
+inetutils-telnet
 irssi
 lftp
 links
@@ -452,6 +452,7 @@ rtorrent
 s-nail
 sic
 tin
+tnftp
 trn
 w3m
 
