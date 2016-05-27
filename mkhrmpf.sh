@@ -2,7 +2,7 @@
 
 ./mklive.sh \
 	-T "hrmpf live/rescue system" \
-	-C "loglevel=6 printk.time=1 net.ifnames=0" \
+	-C "loglevel=6 printk.time=1 consoleblank=0 net.ifnames=0" \
 	-r http://repo.voidlinux.eu/current \
 	-r http://repo.voidlinux.eu/current/nonfree \
 	-S 1024 \
