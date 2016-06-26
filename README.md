@@ -30,6 +30,7 @@ This project is based on void-mklive.
    * iPXE
    * FreeDOS
    * MHDD32 hard disk analysis
+   * Bare GRUB 2
 
 * ISO image can be burned on CD or written raw on USB stick.
 

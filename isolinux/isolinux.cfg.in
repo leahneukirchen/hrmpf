@@ -48,6 +48,11 @@ MENU LABEL Balder10 FreeDOS
 KERNEL memdisk
 INITRD /boot/balder10.img
 APPEND raw
+LABEL grub
+MENU LABEL Bare GRUB 2
+KERNEL memdisk
+APPEND iso
+INITRD /boot/grub2.iso
 LABEL c
 MENU LABEL Boot first HD found by BIOS
 COM32 chain.c32
