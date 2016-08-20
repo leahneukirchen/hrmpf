@@ -9,6 +9,7 @@ dstat
 extrace
 f3
 fatrace
+fio
 hdapsd
 hddtemp
 htop
@@ -47,6 +48,7 @@ dhcpcd
 ebtables
 ethtool
 fping
+grepcidr
 horst
 hostapd
 ifenslave
@@ -96,6 +98,7 @@ s6-dns
 s6-networking
 shorewall
 shorewall6
+sipcalc
 slurm
 socat
 swaks
@@ -123,6 +126,7 @@ at
 attr
 bc
 beep
+buffer
 busybox
 byobu
 cdrtools
@@ -180,6 +184,7 @@ mc
 metalog
 miller
 minised
+ministat
 mmv
 msrc_base
 multitail
@@ -188,6 +193,7 @@ nocache
 nq
 numactl
 odo
+opendoas
 oue
 outils
 par
@@ -214,6 +220,7 @@ sispmctl
 snooze
 socklog-void
 sudo
+su-exec
 tab
 the_silver_searcher
 time
@@ -247,6 +254,7 @@ jfsutils
 kpartx
 lvm2
 mdadm
+mergerfs
 mhddfs
 mtools
 nbd
@@ -300,6 +308,7 @@ pixz
 rpmextract
 sharutils
 tar
+unp
 unrar
 unzip
 xz
@@ -323,6 +332,7 @@ nmap
 p0f
 passwdqc
 pwgen
+reop
 rng-tools
 scrypt
 testssl.sh
@@ -473,8 +483,10 @@ privoxy
 rsyslog
 stunnel
 tftp-hpa
+tinyproxy
 unbound
 xinetd
+zerotier-one
 
 # office
 ledger
