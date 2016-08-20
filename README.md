@@ -38,6 +38,11 @@ This project is based on void-mklive.
 
 * A plain Bash as default shell without annoying fancy configuration.
 
+#### Minimum requirements
+
+* x86-64/EM64T CPU
+* 160 MB RAM
+
 #### Usage
 
 To build your own:
