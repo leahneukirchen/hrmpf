@@ -49,7 +49,7 @@ if [ cpuid -l ]; then
 		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
 		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
 		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
-		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
+		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ \
                 console=tty0 console=ttyS0,115200n8
         initrd (${voidlive})/boot/initrd
     }
