@@ -17,8 +17,8 @@ if loadfont "(${voidlive})/boot/grub/fonts/unicode.pf2" ; then
     insmod gfxterm
     set gfxmode="auto"
     
-    terminal_input console
-    terminal_output gfxterm
+    terminal_input console serial
+    terminal_output gfxterm serial
     
     insmod png
     background_image "(${voidlive})/boot/isolinux/@@SPLASHIMAGE@@"
@@ -41,6 +41,16 @@ if [ cpuid -l ]; then
 		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
 		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
 		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
+        initrd (${voidlive})/boot/initrd
+    }
+    menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (Serial)" {
+        set gfxpayload="keep"
+        linux (${voidlive})/boot/vmlinuz \
+		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
+		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
+		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
+                console=tty0 console=ttyS0,115200n8
         initrd (${voidlive})/boot/initrd
     }
 fi
