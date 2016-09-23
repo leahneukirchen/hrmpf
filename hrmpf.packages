@@ -31,6 +31,7 @@ powertop
 read-edid
 smartmontools
 strace
+stress
 sysstat
 tiptop
 tpm-tools
@@ -321,6 +322,7 @@ zstd
 # security
 acme-client
 apg
+ccrypt
 dnsmap
 ent
 ettercap
