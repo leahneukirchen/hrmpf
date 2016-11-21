@@ -15,6 +15,7 @@ hddtemp
 htop
 i2c-tools
 idle3-tools
+interbench
 ioping
 ioprof
 iotop
@@ -24,6 +25,7 @@ lshw
 lsof
 ltrace
 mcelog
+memtester
 msr-tools
 nethogs
 pciutils
@@ -35,6 +37,7 @@ stress
 sysstat
 tiptop
 tpm-tools
+unixbench
 usbutils
 
 # networking
@@ -45,6 +48,7 @@ bind-utils
 bmon
 bwm-ng
 bridge-utils
+create_ap
 ddclient
 dhcpcd
 ebtables
@@ -53,6 +57,7 @@ fping
 grepcidr
 horst
 hostapd
+httptunnel
 ifenslave
 iftop
 ifstatus
@@ -104,6 +109,7 @@ shorewall6
 sipcalc
 slurm
 socat
+sshpass
 swaks
 tcpdump
 tcpflow
@@ -214,6 +220,7 @@ quota
 ranger
 rdfind
 reptyr
+ripgrep
 rlwrap
 s6
 sample
@@ -231,6 +238,7 @@ tmux
 tree
 ttyrec
 util-linux
+watchdog
 wgetpaste
 which
 xe
@@ -275,6 +283,7 @@ squashfs-tools
 sysfsutils
 tc-play
 tgt
+u9fs
 xfsdump
 xfsprogs
 zerofree
@@ -318,6 +327,7 @@ unzip
 xz
 zip
 zstd
+zutils
 
 # security
 acme-client
@@ -378,6 +388,7 @@ bvi
 dcraw
 ddrescue
 dhex
+docx2txt
 extundelete
 fbpdf
 fbv
@@ -445,6 +456,7 @@ tcsh
 zsh
 
 # text editors
+e3
 ed
 emacs
 ex-vi
@@ -470,6 +482,7 @@ mcabber
 mpop
 mutt
 ncftp
+poezio
 rtorrent
 s-nail
 sic
@@ -481,6 +494,7 @@ w3m
 # servers
 dnsmasq
 fastd
+hitch
 inetutils-inetd
 nginx
 nsd
