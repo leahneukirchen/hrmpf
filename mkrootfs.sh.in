@@ -47,7 +47,9 @@ Usage: $PROGNAME [options] <platform>
 
 Supported platforms: i686, i686-musl, x86_64, x86_64-musl,
                      dockstar, bananapi, beaglebone, cubieboard2, cubietruck,
-                     odroid-c2, odroid-u2, rpi, rpi2 (armv7), usbarmory, ci20
+                     odroid-c2, odroid-u2, rpi, rpi2 (armv7), rpi3 (aarch64),
+                     usbarmory, ci20
+
 
 Options
     -b <syspkg> Set an alternative base-system package (defaults to base-system)
@@ -69,9 +71,11 @@ mount_pseudofs() {
 }
 
 umount_pseudofs() {
-    for f in dev proc sys; do
-        umount -f $rootfs/$f >/dev/null 2>&1
-    done
+    if [ -d "${rootfs}" ]; then
+        for f in dev proc sys; do
+            umount -f $rootfs/$f >/dev/null 2>&1
+        done
+    fi
 }
 
 run_cmd_target() {
@@ -137,6 +141,8 @@ case "$PLATFORM" in
     dockstar) _TARGET_ARCH="armv5tel"; _ARCH="armv5tel";;
     rpi-musl) _TARGET_ARCH="armv6l-musl"; _ARCH="armv6l";;
     rpi) _TARGET_ARCH="armv6l"; _ARCH="armv6l";;
+    rpi3-musl) _TARGET_ARCH="aarch64-musl"; _ARCH="aarch64";;
+    rpi3) _TARGET_ARCH="aarch64"; _ARCH="aarch64";;
     ci20-musl) _TARGET_ARCH="mipselhf-musl"; _ARCH="mipsel-musl";;
     ci20) _TARGET_ARCH="mipselhf"; _ARCH="mipsel";;
     odroid-c2-musl) _TARGET_ARCH="aarch64-musl"; _ARCH="aarch64";;
@@ -145,7 +151,7 @@ case "$PLATFORM" in
     *) _TARGET_ARCH="armv7l"; _ARCH="armv7l";;
 esac
 
-: ${XBPS_REPOSITORY:=--repository=http://repo.voidlinux.eu/current --repository=http://muslrepo.voidlinux.eu/current}
+: ${XBPS_REPOSITORY:=--repository=http://repo.voidlinux.eu/current --repository=http://repo.voidlinux.eu/current/musl --repository=http://repo.voidlinux.eu/current/aarch64}
 : ${XBPS_CACHEDIR:=--cachedir=$PWD/xbps-cachedir-${_TARGET_ARCH}}
 case "$PLATFORM" in
     i686*|x86_64*) PKGBASE="base-voidstrap";;
@@ -164,6 +170,7 @@ case "$PLATFORM" in
     cubieboard2*|cubietruck*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
     dockstar*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
     odroid-u2*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
+    rpi3*) SUBPLATFORM=rpi3; QEMU_BIN=qemu-aarch64-static;;
     rpi2*) SUBPLATFORM=rpi; QEMU_BIN=qemu-arm-static;;
     rpi*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
     usbarmory*) SUBPLATFORM=${PLATFORM%-*}; QEMU_BIN=qemu-arm-static;;
@@ -192,7 +199,7 @@ fi
 #
 # Check if package base-system is available.
 #
-rootfs=$(mktemp -d || die "FATAL: failed to create tempdir, exiting...")
+rootfs=$(mktemp -d) || die "failed to create tempdir, exiting..."
 mkdir -p $rootfs/var/db/xbps/keys
 cp keys/*.plist $rootfs/var/db/xbps/keys
 
@@ -264,7 +271,7 @@ if [ -n "${_ARCH}" ]; then
 fi
 
 tarball=void-${PLATFORM}-rootfs-$(date '+%Y%m%d').tar.xz
-run_cmd "tar -cp --posix -C $rootfs . | xz -T0 -9 > $tarball "
+run_cmd "tar -cp --posix --xattrs -C $rootfs . | xz -T0 -9 > $tarball "
 
 rm -rf $rootfs
 

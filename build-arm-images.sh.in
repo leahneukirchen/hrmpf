@@ -3,7 +3,7 @@
 TARGET="$1"
 [ -n "$TARGET" ] && shift
 
-: ${PLATFORMS:="beaglebone cubieboard2 odroid-u2 rpi rpi2 usbarmory"}
+: ${PLATFORMS:="beaglebone cubieboard2 odroid-c2 odroid-u2 rpi rpi2 rpi3 usbarmory"}
 DATE=$(date '+%Y%m%d')
 
 for f in ${PLATFORMS} x ${PLATFORMS} ; do
@@ -15,7 +15,7 @@ for f in ${PLATFORMS} x ${PLATFORMS} ; do
 	if [ -n "$musl" ]; then
 		target=${f}-musl
 	fi
-        if [ -z "$ARGET" -o "$TARGET" = "$target" ]; then
+        if [ -z "$TARGET" -o "$TARGET" = "$target" ]; then
 		./mkrootfs.sh $@ $target && ./mkimage.sh void-${target}-rootfs-${DATE}.tar.xz && xz -T0 -9 void-${target}-${DATE}.img
 	fi
 done
