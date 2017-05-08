@@ -113,7 +113,7 @@ fi
 
 # double check PLATFORM is supported...
 case "$PLATFORM" in
-    bananapi|beaglebone|cubieboard2|cubietruck|odroid-c2|odroid-u2|rpi|rpi2|usbarmory|*-musl);;
+    bananapi|beaglebone|cubieboard2|cubietruck|odroid-c2|odroid-u2|rpi|rpi2|rpi3|usbarmory|*-musl);;
     *) die "The $PLATFORM is not supported, exiting..."
 esac
 
@@ -155,7 +155,7 @@ _EOF
     sfdisk ${FILENAME} <<_EOF
 label: dos
 2048,${BOOT_FSSIZE},b,*
-${BOOT_FSSIZE},+,L
+,+,L
 _EOF
     LOOPDEV=$(losetup --show --find --partscan $FILENAME)
     mkfs.${BOOT_FSTYPE} $_args ${LOOPDEV}p1 >/dev/null
@@ -179,7 +179,7 @@ if [ "$PLATFORM" = "beaglebone" ]; then
     touch $ROOTFSDIR/boot/uEnv.txt
     umount $ROOTFSDIR/boot
 fi
-tar xfp $ROOTFS_TARBALL -C $ROOTFSDIR
+tar xfp $ROOTFS_TARBALL --xattrs --xattrs-include='*' -C $ROOTFSDIR
 
 fspassno="1"
 if [ "$ROOT_FSTYPE" = "f2fs" ]; then
