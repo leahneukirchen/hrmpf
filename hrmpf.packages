@@ -43,6 +43,7 @@ tiptop
 tpm-tools
 unixbench
 usbutils
+virt-what
 
 # networking
 aiccu
@@ -52,11 +53,13 @@ bind-utils
 bmon
 bwm-ng
 bridge-utils
+chrony
 create_ap
 ddclient
 dhcpcd
 ebtables
 ethtool
+ferm
 fping
 grepcidr
 horst
@@ -78,6 +81,7 @@ iptables
 iptraf-ng
 iputils
 iw
+jnettop
 ldns
 lft
 liboping
@@ -104,6 +108,7 @@ ppp
 pptpclient
 procmail
 radvd
+redsocks
 rfkill
 rpcbind
 s6-dns
@@ -117,7 +122,9 @@ sshpass
 swaks
 tcpdump
 tcpflow
+tcping
 tcptrack
+tinyssh
 tlsdate
 tor
 traceroute
@@ -162,8 +169,10 @@ dos2unix
 dtach
 duff
 dvtm
+earlyoom
 efmd
 entr
+etckeeper
 execline
 faketime
 fbgrab
@@ -204,6 +213,7 @@ multitail
 ncdu
 nocache
 nq
+nsjail
 numactl
 odo
 opendoas
@@ -242,6 +252,7 @@ tmux
 tree
 ttyrec
 util-linux
+vimpager
 watchdog
 wgetpaste
 which
@@ -251,6 +262,7 @@ xmlstarlet
 xtools
 
 # filesystems & storage
+bcache-tools
 btrfs-progs
 cryptsetup
 dmraid
@@ -322,6 +334,7 @@ pax
 pbzip2
 pigz
 pixz
+plzip
 rpmextract
 sharutils
 tar
@@ -352,7 +365,9 @@ minisign
 nmap
 p0f
 passwdqc
+pgpdump
 pwgen
+reaver
 reop
 rng-tools
 scrypt
@@ -394,7 +409,6 @@ ddrescue
 dhex
 docx2txt
 extundelete
-fbpdf
 fbv
 flashrom
 foremost
@@ -430,6 +444,7 @@ vorbis-tools
 attic
 backupninja
 borg
+btrbk
 bup
 burp-client
 burp-server
@@ -437,6 +452,7 @@ csync
 csync2
 dar
 duplicity
+fsarchiver
 mt-st
 obnam
 rdiff-backup
@@ -457,6 +473,7 @@ pdmenu
 posh
 rc
 tcsh
+yash
 zsh
 
 # text editors
@@ -515,7 +532,6 @@ xinetd
 zerotier-one
 
 # office
-ledger
 sc
 sc-im
 when
