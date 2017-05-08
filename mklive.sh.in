@@ -168,10 +168,14 @@ generate_initramfs() {
         _args="--omit systemd"
     fi
     chroot $ROOTFS env -i /usr/bin/dracut -N --${INITRAMFS_COMPRESSION} \
+        --add-drivers "ahci" --force-add "vmklive" ${_args} "/boot/initrd-lts" $LTSKERNELVERSION
+    chroot $ROOTFS env -i /usr/bin/dracut -N --${INITRAMFS_COMPRESSION} \
         --add-drivers "ahci" --force-add "vmklive" ${_args} "/boot/initrd" $KERNELVERSION
     [ $? -ne 0 ] && die "Failed to generate the initramfs"
 
+    mv $ROOTFS/boot/initrd-lts $BOOT_DIR
     mv $ROOTFS/boot/initrd $BOOT_DIR
+    cp $ROOTFS/boot/vmlinuz-$LTSKERNELVERSION $BOOT_DIR/vmlinuz-lts
     cp $ROOTFS/boot/vmlinuz-$KERNELVERSION $BOOT_DIR/vmlinuz
     if [ "$BOOT_FILES" ]; then
         cp $BOOT_FILES $BOOT_DIR
@@ -207,6 +211,7 @@ generate_isolinux_boot() {
 
     sed -i  -e "s|@@SPLASHIMAGE@@|$(basename ${SPLASH_IMAGE})|" \
         -e "s|@@KERNVER@@|${KERNELVERSION}|" \
+        -e "s|@@LTSKVER@@|${LTSKERNELVERSION}|" \
         -e "s|@@KEYMAP@@|${KEYMAP}|" \
         -e "s|@@ARCH@@|$BASE_ARCH|" \
         -e "s|@@LOCALE@@|${LOCALE}|" \
@@ -220,6 +225,7 @@ generate_grub_efi_boot() {
     cp -f grub/grub_void.cfg.in $GRUB_DIR/grub_void.cfg
     sed -i  -e "s|@@SPLASHIMAGE@@|$(basename ${SPLASH_IMAGE})|" \
         -e "s|@@KERNVER@@|${KERNELVERSION}|" \
+        -e "s|@@LTSKVER@@|${LTSKERNELVERSION}|" \
         -e "s|@@KEYMAP@@|${KEYMAP}|" \
         -e "s|@@ARCH@@|$BASE_ARCH|" \
         -e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
@@ -403,6 +409,10 @@ XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r $VOIDHOSTDIR $XBPS_REPOSITORY -S
 _linux_series=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -x linux|head -1)
 _kver=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -p pkgver ${_linux_series})
 KERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_kver})
+
+_linux_lts_series=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -x linux-lts|head -1)
+_lts_kver=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -p pkgver ${_linux_lts_series})
+LTSKERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_lts_kver})
 
 : ${OUTPUT_FILE="hrmpf-${BASE_ARCH}-${KERNELVERSION}-$(date +%Y%m%d).iso"}
 

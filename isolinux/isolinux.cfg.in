@@ -29,6 +29,18 @@ LABEL linuxtext
 MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (Text mode/Serial)
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ modprobe.blacklist=bochs_drm nomodeset console=tty0 console=ttyS0,115200n8
+LABEL linuxlts
+MENU LABEL @@BOOT_TITLE@@ @@LTSKVER@@ LTS @@ARCH@@
+KERNEL /boot/vmlinuz-lts
+APPEND initrd=/boot/initrd-lts root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
+LABEL linuxltsram
+MENU LABEL @@BOOT_TITLE@@ @@LTSKVER@@ LTS @@ARCH@@ (RAM)
+KERNEL /boot/vmlinuz-lts
+APPEND initrd=/boot/initrd-lts root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
+LABEL linuxltstext
+MENU LABEL @@BOOT_TITLE@@ @@LTSKVER@@ LTS @@ARCH@@ (Text mode/Serial)
+KERNEL /boot/vmlinuz-lts
+APPEND initrd=/boot/initrd-lts root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ modprobe.blacklist=bochs_drm nomodeset console=tty0 console=ttyS0,115200n8
 LABEL hdt
 MENU LABEL HDT (Hardware Detection Tool)
 KERNEL hdt.c32

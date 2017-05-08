@@ -1,3 +1,7 @@
+# lts kernel
+linux-lts
+linux-lts-headers
+
 # diagnosis
 acpi
 atop
