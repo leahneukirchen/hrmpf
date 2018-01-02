@@ -29,6 +29,7 @@ lshw
 lsof
 ltrace
 mcelog
+mei-amt-check
 memtester
 msr-tools
 nethogs
@@ -47,6 +48,7 @@ virt-what
 
 # networking
 aiccu
+arp-scan
 arpwatch
 autossh
 bind-utils
@@ -111,6 +113,8 @@ radvd
 redsocks
 rfkill
 rpcbind
+s6
+s6-linux-utils
 s6-dns
 s6-networking
 shorewall
@@ -135,6 +139,7 @@ whois
 wireless_tools
 wol
 wpa_supplicant
+wrk
 wvdial
 
 # general system tools
@@ -152,6 +157,7 @@ byobu
 cdrtools
 cmark
 colordiff
+convmv
 cpulimit
 cpupower
 crda
@@ -174,6 +180,7 @@ efmd
 entr
 etckeeper
 execline
+fail
 faketime
 fbgrab
 fbset
@@ -211,6 +218,7 @@ mmv
 msrc_base
 multitail
 ncdu
+necho
 nocache
 nq
 nsjail
@@ -240,11 +248,12 @@ s6
 sample
 schedtool
 screen
+shmux
 sispmctl
 snooze
 socklog-void
-sudo
 su-exec
+sudo
 tab
 the_silver_searcher
 time
@@ -286,6 +295,7 @@ mhddfs
 mtools
 nbd
 ntfs-3g
+nvme-cli
 nwipe
 open-iscsi
 partclone
@@ -300,6 +310,7 @@ sysfsutils
 tc-play
 tgt
 u9fs
+udftools
 xfsdump
 xfsprogs
 zerofree
@@ -350,6 +361,7 @@ zutils
 acme-client
 apg
 ccrypt
+chntpw
 dnsmap
 ent
 ettercap
@@ -361,6 +373,7 @@ john
 keyutils
 kismet
 libressl
+masscan
 minisign
 nmap
 p0f
@@ -401,9 +414,11 @@ texinfo
 
 # rescue & forensics
 antiword
+bcal
 biew
 binwalk
 bvi
+chkrootkit
 dcraw
 ddrescue
 dhex
@@ -414,6 +429,7 @@ flashrom
 foremost
 hashdeep
 ht
+hyx
 ired
 jhead
 mtree
@@ -437,6 +453,7 @@ libao-sndio
 mpg123
 nethack
 sndio
+tmines
 vitetris
 vorbis-tools
 
@@ -452,11 +469,13 @@ csync
 csync2
 dar
 duplicity
+dvdbackup
 fsarchiver
 mt-st
 obnam
 rdiff-backup
 rdumpfs
+restic
 rsnapshot
 rsync
 snapraid
@@ -499,6 +518,7 @@ ldapvi
 lftp
 links
 lynx
+mblaze
 mcabber
 mpop
 mutt
@@ -528,6 +548,7 @@ stunnel
 tftp-hpa
 tinyproxy
 unbound
+wireguard
 xinetd
 zerotier-one
 
