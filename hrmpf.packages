@@ -1,6 +1,6 @@
 # lts kernel
-linux-lts
-linux-lts-headers
+linux4.9
+linux4.9-headers
 
 # diagnosis
 acpi
