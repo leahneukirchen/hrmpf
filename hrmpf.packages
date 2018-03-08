@@ -217,6 +217,7 @@ ministat
 mmv
 msrc_base
 multitail
+multitime
 ncdu
 necho
 nocache
@@ -231,7 +232,6 @@ par
 parallel
 pax-utils
 perl
-pflask-git
 picocom
 pm-utils
 pmr
@@ -240,6 +240,7 @@ pv
 python
 quota
 ranger
+rdd
 rdfind
 reptyr
 ripgrep
@@ -377,6 +378,7 @@ masscan
 minisign
 nmap
 p0f
+paperkey
 passwdqc
 pgpdump
 pwgen
