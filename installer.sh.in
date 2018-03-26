@@ -1333,7 +1333,7 @@ menu() {
         DEFITEM="Keyboard"
     fi
 
-    if xbps-uhelper arch | grep '-musl$'; then
+    if xbps-uhelper arch | grep '-musl$' > /dev/null; then
         DIALOG --default-item $DEFITEM \
             --extra-button --extra-label "Settings" \
             --title " Void Linux installation menu " \
