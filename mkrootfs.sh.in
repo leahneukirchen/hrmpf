@@ -145,7 +145,7 @@ case "$PLATFORM" in
     *) _TARGET_ARCH="armv7l"; _ARCH="armv7l";;
 esac
 
-: ${XBPS_REPOSITORY:=--repository=http://repo.voidlinux.eu/current --repository=http://muslrepo.voidlinux.eu/current}
+: ${XBPS_REPOSITORY:=--repository=http://alpha.de.repo.voidlinux.org/current --repository=http://alpha.de.voidlinux.org/current/musl}
 : ${XBPS_CACHEDIR:=--cachedir=$PWD/xbps-cachedir-${_TARGET_ARCH}}
 case "$PLATFORM" in
     i686*|x86_64*) PKGBASE="base-voidstrap";;

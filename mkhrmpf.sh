@@ -3,8 +3,8 @@
 ./mklive.sh \
 	-T "hrmpf live/rescue system" \
 	-C "loglevel=6 printk.time=1 consoleblank=0 net.ifnames=0" \
-	-r http://repo.voidlinux.eu/current \
-	-r http://repo.voidlinux.eu/current/nonfree \
+	-r http://alpha.de.repo.voidlinux.org/current \
+	-r http://alpha.de.repo.voidlinux.org/current/nonfree \
 	-S 1024 \
 	-s "xz -Xbcj x86" \
 	-B extra/balder10.img \

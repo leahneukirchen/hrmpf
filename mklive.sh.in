@@ -347,7 +347,7 @@ while getopts "a:A:B:b:r:c:C:T:Kk:l:i:I:s:S:o:p:U:h" opt; do
 done
 shift $((OPTIND - 1))
 
-XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://repo.voidlinux.eu/current --repository=http://muslrepo.voidlinux.eu/current"
+XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=http://alpha.derepo.voidlinux.org/current --repository=http://alpha.de.voidlinux.org/current/musl"
 
 ARCH=$(xbps-uhelper arch)
 
