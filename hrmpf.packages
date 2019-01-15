@@ -8,6 +8,9 @@ atop
 blktrace
 bonnie++
 cpuburn
+cpuid
+cpuinfo
+diskscan
 dmidecode
 dstat
 extrace
@@ -47,7 +50,7 @@ usbutils
 virt-what
 
 # networking
-aiccu
+6tunnel
 arp-scan
 arpwatch
 autossh
@@ -123,6 +126,7 @@ sipcalc
 slurm
 socat
 sshpass
+sshuttle
 swaks
 tcpdump
 tcpflow
@@ -245,6 +249,8 @@ rdfind
 reptyr
 ripgrep
 rlwrap
+rw
+rwc
 s6
 sample
 schedtool
@@ -275,6 +281,7 @@ xtools
 bcache-tools
 btrfs-progs
 cryptsetup
+dmg2img
 dmraid
 dosfstools
 dumpet
@@ -284,6 +291,7 @@ ext4magic
 fuse
 fuse-exfat
 fuse-sshfs
+geteltorito
 gptfdisk
 hdparm
 hfsprogs
@@ -379,7 +387,9 @@ minisign
 nmap
 p0f
 paperkey
+pass
 passwdqc
+pdfcrack
 pgpdump
 pwgen
 reaver
@@ -401,7 +411,6 @@ gcc
 gdb
 gettext
 git
-git-perl
 glibc-devel
 libtool
 m4
@@ -425,6 +434,7 @@ dcraw
 ddrescue
 dhex
 docx2txt
+e2tools
 extundelete
 fbv
 flashrom
@@ -434,6 +444,7 @@ ht
 hyx
 ired
 jhead
+lz4jsoncat
 mtree
 pev
 rhash
@@ -454,6 +465,7 @@ ddate
 libao-sndio
 mpg123
 nethack
+nudoku
 sndio
 tmines
 vitetris
@@ -498,6 +510,7 @@ yash
 zsh
 
 # text editors
+dte
 e3
 ed
 emacs
@@ -528,6 +541,7 @@ ncftp
 poezio
 rtorrent
 s-nail
+sacc
 sic
 tin
 tnftp
