@@ -52,5 +52,5 @@ To build your own:
     % linux32 ./mkhrmpf.sh
 
 Download pre-built images at
-<https://github.com/chneukirchen/hrmpf/releases>.
+<https://github.com/leahneukirchen/hrmpf/releases>.
 
