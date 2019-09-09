@@ -14,4 +14,4 @@
 	-B extra/grub2.iso \
 	-p "$(grep '^[^#].' hrmpf.packages)" \
 	-A "gawk tnftp inetutils-hostname libressl-netcat dash vim-common" \
-	-U "spl zfs"
+	-U "zfs"

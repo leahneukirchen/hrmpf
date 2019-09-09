@@ -8,7 +8,6 @@ atop
 blktrace
 bonnie++
 cpuburn
-cpuid
 cpuinfo
 diskscan
 dmidecode
@@ -30,6 +29,7 @@ ipmitool
 lm_sensors
 lshw
 lsof
+lsscsi
 ltrace
 mcelog
 mei-amt-check
@@ -42,6 +42,7 @@ read-edid
 smartmontools
 strace
 stress
+stress-ng
 sysstat
 tiptop
 tpm-tools
@@ -61,8 +62,10 @@ bridge-utils
 chrony
 create_ap
 ddclient
+dhclient
 dhcpcd
 ebtables
+ethstatus
 ethtool
 ferm
 fping
@@ -97,6 +100,7 @@ mosh
 msmtp
 mtr
 ndisc6
+nemesis
 net-snmp
 net-tools
 nfs-utils
@@ -202,6 +206,7 @@ icdiff
 inotify-tools
 irqbalance
 jo
+jq
 kbd
 kbd-data
 kexec-tools
@@ -246,6 +251,7 @@ quota
 ranger
 rdd
 rdfind
+reap
 reptyr
 ripgrep
 rlwrap
@@ -295,6 +301,7 @@ geteltorito
 gptfdisk
 hdparm
 hfsprogs
+hfsutils
 jfsutils
 kpartx
 lvm2
@@ -326,6 +333,7 @@ zerofree
 
 # bootloader
 efibootmgr
+efitools
 efivar
 grub
 grub-i386-efi
@@ -333,6 +341,7 @@ grub-x86_64-efi
 gummiboot
 lilo
 ms-sys
+sbsigntool
 syslinux
 vboot-utils
 
@@ -372,6 +381,7 @@ apg
 ccrypt
 chntpw
 dnsmap
+easyrsa
 ent
 ettercap
 gnupg
@@ -424,6 +434,7 @@ smake
 texinfo
 
 # rescue & forensics
+aide
 antiword
 bcal
 biew
@@ -460,6 +471,7 @@ cmus
 cmus-flac
 cmus-libao
 cmus-mpc
+cpat
 crawl
 ddate
 libao-sndio
@@ -493,6 +505,7 @@ restic
 rsnapshot
 rsync
 snapraid
+snazzer
 unison
 zbackup
 zpaq
