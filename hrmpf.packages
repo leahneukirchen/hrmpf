@@ -226,6 +226,7 @@ minised
 ministat
 mmv
 msrc_base
+mtm
 multitail
 multitime
 ncdu
@@ -242,6 +243,7 @@ par
 parallel
 pax-utils
 perl
+pfetch
 picocom
 pm-utils
 pmr
@@ -378,6 +380,7 @@ zutils
 
 # security
 acme-client
+age
 apg
 ccrypt
 chntpw
@@ -387,6 +390,7 @@ ent
 ettercap
 gnupg
 gnupg2
+gnupg2-scdaemon
 hashcat
 haveged
 john
@@ -396,6 +400,8 @@ libressl
 masscan
 minisign
 nmap
+opensc
+opensc-pkcs11
 p0f
 paperkey
 pass
@@ -408,6 +414,7 @@ reop
 rng-tools
 scrypt
 testssl.sh
+yubikey-manager
 zmap
 
 # development
