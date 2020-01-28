@@ -460,6 +460,7 @@ fbv
 flashrom
 foremost
 hashdeep
+hexd
 ht
 hyx
 ired
@@ -467,6 +468,7 @@ jhead
 lz4jsoncat
 mtree
 pev
+pixd
 rhash
 rkhunter
 sleuthkit
