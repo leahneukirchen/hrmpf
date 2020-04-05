@@ -111,6 +111,7 @@ nmon
 ntp
 openbsd-netcat
 openssh
+openssh-sk-helper
 pchar
 polysh
 ppp
@@ -445,6 +446,7 @@ texinfo
 # rescue & forensics
 aide
 antiword
+b3sum
 bcal
 biew
 binwalk
