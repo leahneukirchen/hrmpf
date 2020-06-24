@@ -133,6 +133,7 @@ socat
 sshpass
 sshuttle
 swaks
+tailscale
 tcpdump
 tcpflow
 tcping
