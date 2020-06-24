@@ -5,7 +5,7 @@
 	-C "loglevel=6 printk.time=1 consoleblank=0 net.ifnames=0" \
 	-r http://alpha.de.repo.voidlinux.org/current \
 	-r http://alpha.de.repo.voidlinux.org/current/nonfree \
-	-S 1024 \
+	-S 2048 \
 	-s "xz -Xbcj x86" \
 	-B extra/balder10.img \
 	-B extra/mhdd32ver4.6.iso \
