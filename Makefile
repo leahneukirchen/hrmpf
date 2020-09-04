@@ -27,7 +27,7 @@ install: all
 	install -m644 isolinux/*.cfg* $(DESTDIR)$(SHAREDIR)/void-mklive
 
 clean:
-	-rm -f *.sh
+	-rm -f $(SCRIPTS)
 
 dist:
 	@echo "Building distribution tarball for tag: v$(VERSION) ..."
