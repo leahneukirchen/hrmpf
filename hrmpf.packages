@@ -550,6 +550,7 @@ qed
 vim
 
 # clients
+alpine
 edbrowse
 elinks
 ii
