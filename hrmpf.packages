@@ -64,7 +64,6 @@ create_ap
 ddclient
 dhclient
 dhcpcd
-ebtables
 ethstatus
 ethtool
 ferm
@@ -251,7 +250,8 @@ picocom
 pmr
 progress
 pv
-python
+python3
+qrencode
 quota
 ranger
 rdd
@@ -278,6 +278,7 @@ time
 tmux
 tree
 ttyrec
+ugrep
 util-linux
 vimpager
 watchdog
@@ -383,14 +384,12 @@ zutils
 # security
 acme-client
 age
-apg
 ccrypt
 chntpw
 dnsmap
 easyrsa
 ent
 ettercap
-gnupg
 gnupg2
 gnupg2-scdaemon
 hashcat
@@ -546,6 +545,7 @@ mg
 nano
 neatvi
 nvi
+qed
 vim
 
 # clients
