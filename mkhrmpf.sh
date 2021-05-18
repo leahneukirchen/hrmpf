@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Create an empty zpool.cache to prevent importing at boot
+mkdir -p hrmpf-include/etc/zfs
+: > hrmpf-include/etc/zfs/zpool.cache
+
 ./mklive.sh \
 	-T "hrmpf live/rescue system" \
 	-C "loglevel=6 printk.time=1 consoleblank=0 net.ifnames=0" \
@@ -14,3 +18,4 @@
 	-B extra/grub2.iso \
 	-p "$(grep '^[^#].' hrmpf.packages)" \
 	-A "gawk tnftp inetutils-hostname libressl-netcat dash vim-common" \
+	-I hrmpf-include \
