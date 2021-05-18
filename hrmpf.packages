@@ -118,7 +118,6 @@ pptpclient
 procmail
 radvd
 redsocks
-rfkill
 rpcbind
 s6
 s6-linux-utils
@@ -138,7 +137,6 @@ tcpflow
 tcping
 tcptrack
 tinyssh
-tlsdate
 tor
 traceroute
 vde2
@@ -211,7 +209,6 @@ irqbalance
 jo
 jq
 kbd
-kbd-data
 kexec-tools
 less
 linux-firmware
@@ -384,7 +381,6 @@ zstd
 zutils
 
 # security
-acme-client
 age
 ccrypt
 chntpw
@@ -399,7 +395,6 @@ haveged
 john
 keyutils
 kismet
-libressl
 masscan
 minisign
 nmap
@@ -503,8 +498,6 @@ backupninja
 borg
 btrbk
 bup
-burp-client
-burp-server
 csync
 csync2
 dar
@@ -512,7 +505,6 @@ duplicity
 dvdbackup
 fsarchiver
 mt-st
-obnam
 rdiff-backup
 rdumpfs
 restic
@@ -596,7 +588,6 @@ tinyproxy
 unbound
 wireguard
 xinetd
-zerotier-one
 
 # office
 sc
