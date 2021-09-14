@@ -169,9 +169,9 @@ generate_initramfs() {
         _args="--omit systemd"
     fi
     chroot $ROOTFS env -i /usr/bin/dracut -N --${INITRAMFS_COMPRESSION} \
-        --add-drivers "ahci" --force-add "vmklive" ${_args} "/boot/initrd-lts" $LTSKERNELVERSION
+        --add-drivers "ahci" --force-add "vmklive livenet" ${_args} "/boot/initrd-lts" $LTSKERNELVERSION
     chroot $ROOTFS env -i /usr/bin/dracut -N --${INITRAMFS_COMPRESSION} \
-        --add-drivers "ahci" --force-add "vmklive" ${_args} "/boot/initrd" $KERNELVERSION
+        --add-drivers "ahci" --force-add "vmklive livenet" ${_args} "/boot/initrd" $KERNELVERSION
     [ $? -ne 0 ] && die "Failed to generate the initramfs"
 
     mv $ROOTFS/boot/initrd-lts $BOOT_DIR

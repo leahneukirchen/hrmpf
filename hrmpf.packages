@@ -57,13 +57,14 @@ arpwatch
 autossh
 bind-utils
 bmon
-bwm-ng
 bridge-utils
+bwm-ng
 chrony
 create_ap
 ddclient
 dhclient
 dhcpcd
+dracut-network
 ethstatus
 ethtool
 ferm
@@ -73,8 +74,8 @@ horst
 hostapd
 httptunnel
 ifenslave
-iftop
 ifstatus
+iftop
 inadyn
 inetutils-hostname
 inetutils-talk
