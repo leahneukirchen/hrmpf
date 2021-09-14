@@ -400,6 +400,7 @@ minisign
 nmap
 opensc
 opensc-pkcs11
+openssl
 p0f
 paperkey
 pass
@@ -590,6 +591,8 @@ wireguard
 xinetd
 
 # office
+python3-xlrd
 sc
 sc-im
+visidata
 when
