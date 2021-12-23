@@ -55,7 +55,7 @@ KERNEL memdisk
 INITRD /boot/mhdd32ver4.6.iso
 APPEND iso
 LABEL ipxe
-MENU LABEL iPXE 1.0.0+
+MENU LABEL iPXE 1.21.1+
 KERNEL memdisk
 INITRD /boot/ipxe.iso
 APPEND iso
