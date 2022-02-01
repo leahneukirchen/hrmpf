@@ -19,6 +19,7 @@ fio
 hdapsd
 hddtemp
 htop
+hwinfo
 i2c-tools
 idle3-tools
 interbench
@@ -94,6 +95,7 @@ ldns
 lft
 liboping
 libressl-netcat
+lldpd
 miniupnpc
 miruo
 mosh
