@@ -25,7 +25,7 @@ idle3-tools
 interbench
 ioping
 ioprof
-iotop
+iotop-c
 ipmitool
 lm_sensors
 lshw
@@ -261,6 +261,7 @@ reap
 reptyr
 ripgrep
 rlwrap
+rset
 rw
 rwc
 s6
@@ -276,6 +277,7 @@ sudo
 tab
 the_silver_searcher
 time
+tio
 tmux
 tree
 ttyrec
@@ -354,8 +356,10 @@ syslinux
 vboot-utils
 
 # archives
+7zip
 bsdtar
 bzip2
+bzip3
 cabextract
 cksfv
 cpio
@@ -365,7 +369,6 @@ lbzip2
 lrzip
 lzip
 lzop
-p7zip
 par2cmdline
 pax
 pbzip2
@@ -469,6 +472,7 @@ ired
 jhead
 lz4jsoncat
 mtree
+qemu-user-static
 pev
 pixd
 rhash
@@ -598,4 +602,5 @@ python3-xlrd
 sc
 sc-im
 visidata
+wcal
 when
