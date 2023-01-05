@@ -1,9 +1,11 @@
-- syslog to tty12
+x syslog to tty12
 - forensic mode (don't touch disks)
-- hrmpf96 (64+32 image, best in the same squashfs and switch_root into
+X hrmpf96 (64+32 image, best in the same squashfs and switch_root into
   bindmount)
 - artwork!
 - install to usb
+- how to make it use less than 512mb? initrd extraction fails even
+  with gzip
 
 fdisk
 mkfs.vfat -n VOID_LIVE
@@ -20,13 +22,17 @@ dd if=/usr/lib/syslinux/bios/mbr.bin of=hrmpf.img conv=notrunc
 
 Possibly interesting packages found in grml not yet in void:
 
-bacula?
-blktrace? no kernel support
-buffer?
-centerim?
-chkrootkit?
-clonezilla?
-daemon? daemonize
-hwinfo?
-ipmitool?
-ipsec-tools?
+- bacula?
+x blktrace?
+x buffer?
+- centerim?
+x chkrootkit?
+- clonezilla?
+x daemon? daemonize
+x hwinfo
+x ipmitool?
+- ipsec-tools?
+
+
+- update iPXE iso
+- provide netboot.xyz iso? (has HTTPS)
