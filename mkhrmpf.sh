@@ -1,8 +1,20 @@
 #!/bin/sh
 
+rm -rf hrmpf-include
+
 # Create an empty zpool.cache to prevent importing at boot
 mkdir -p hrmpf-include/etc/zfs
 : > hrmpf-include/etc/zfs/zpool.cache
+
+mkdir -p hrmpf-include/etc/runit/runsvdir/default
+ln -s /etc/sv/nanoklogd hrmpf-include/etc/runit/runsvdir/default/
+ln -s /etc/sv/socklog-unix hrmpf-include/etc/runit/runsvdir/default/socklog-unix
+mkdir -p hrmpf-include/etc/sv/socklog-unix/log
+printf '%s\n' '#!/bin/sh' 'exec svlogd -ttt /var/log/socklog/* 2>/dev/tty12' > hrmpf-include/etc/sv/socklog-unix/log/run
+chmod +x hrmpf-include/etc/sv/socklog-unix/log/run
+mkdir -p hrmpf-include/var/log/socklog/tty12
+printf '%s\n' '-*' 'e*' 'Eauth.*' 'Eauthpriv.*' > hrmpf-include/var/log/socklog/tty12/config
+
 
 ./mklive.sh \
 	-T "hrmpf live/rescue system" \
