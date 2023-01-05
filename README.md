@@ -9,18 +9,19 @@ This project is based on void-mklive.
 
 #### Dependencies
 
-* xbps>=0.45
+* xbps
 * GNU bash
 
 #### Features
 
 * Loads of console standard tools, with a focus on:
    * system rescue
-   * maintainance
+   * maintenance
    * diagnosis
    * networking
    * security
    * ad-hoc setups
+   * ZFS support
    * tiny bits of entertainment if you have to wait for something
 
 * Missing software easily installable via XBPS.
@@ -40,8 +41,8 @@ This project is based on void-mklive.
 
 #### Minimum requirements
 
-* x86-64/EM64T CPU
-* 160 MB RAM
+* x86_64 CPU
+* 256 MB RAM
 
 #### Usage
 
@@ -49,7 +50,6 @@ To build your own:
 
     % make
     % ./mkhrmpf.sh
-    % linux32 ./mkhrmpf.sh
 
 Download pre-built images at
 <https://github.com/leahneukirchen/hrmpf/releases>.
