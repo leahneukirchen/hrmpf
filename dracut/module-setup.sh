@@ -19,7 +19,6 @@ install() {
         inst /usr/bin/memdiskfind
         instmods mtdblock phram
         inst_rules "$moddir/59-mtd.rules" "$moddir/61-mtd.rules"
-        prepare_udev_rules 59-mtd.rules 61-mtd.rules
         inst_hook pre-udev 01 "$moddir/mtd.sh"
     fi
 
