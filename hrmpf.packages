@@ -1,6 +1,6 @@
 # lts kernel
-linux5.10
-linux5.10-headers
+linux5.15
+linux5.15-headers
 
 # diagnosis
 acpi
@@ -160,6 +160,7 @@ alsa-utils
 ascii
 at
 attr
+bbe
 bc
 beep
 buffer
@@ -292,9 +293,11 @@ xe
 xjobs
 xmlstarlet
 xtools
+xmirror
 
 # filesystems & storage
 bcache-tools
+bcachefs-tools
 btrfs-progs
 cryptsetup
 dmg2img
@@ -352,6 +355,7 @@ grub-x86_64-efi
 gummiboot
 lilo
 ms-sys
+sbctl
 sbsigntool
 syslinux
 vboot-utils
@@ -453,6 +457,7 @@ antiword
 b3sum
 bcal
 biew
+binfmt-support
 binwalk
 bvi
 chkrootkit
@@ -496,6 +501,7 @@ libao-sndio
 mpg123
 nethack
 nudoku
+rogue
 sndio
 tmines
 vitetris
@@ -507,7 +513,6 @@ backupninja
 borg
 btrbk
 bup
-csync
 csync2
 dar
 duplicity
@@ -528,6 +533,7 @@ zpaq
 # shells
 dash
 es
+fish-shell
 ksh
 mksh
 pdmenu
@@ -578,6 +584,7 @@ tin
 tnftp
 trn
 w3m
+weechat
 
 # servers
 dnsmasq
@@ -605,3 +612,8 @@ sc-im
 visidata
 wcal
 when
+
+# accessibility
+brltty
+espeakup
+void-live-audio
