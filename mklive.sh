@@ -442,7 +442,7 @@ install_prereqs
 
 mkdir -p "$ROOTFS"/etc
 [ -s data/motd ] && cp data/motd "$ROOTFS"/etc
-[ -s data/issue ] && cp data/issue "$ROOTFS"/etc
+[ -s data/issue.in ] && sed "s/@@VERSION@@/hrmpf-\\\\m-\\\\r-$(date +%Y%m%d)/" data/issue.in >$ROOTFS/etc/issue
 
 print_step "Installing void pkgs into the rootfs: ${PACKAGE_LIST} ..."
 install_packages
