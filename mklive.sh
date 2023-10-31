@@ -431,10 +431,6 @@ _linux_series=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITOR
 _kver=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -p pkgver ${_linux_series})
 KERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_kver})
 
-_linux_lts_series=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -x linux-lts|grep -v linux-base |head -1)
-_lts_kver=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -p pkgver ${_linux_lts_series})
-LTSKERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_lts_kver})
-
 if [ "$?" -ne "0" ]; then
     die "Failed to find kernel package version"
 fi
@@ -461,6 +457,10 @@ if [ "${#INCLUDE_DIRS[@]}" -gt 0 ];then
 fi
 
 print_step "Generating initramfs image ($INITRAMFS_COMPRESSION)..."
+
+_lts_kver=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -l | sed -n 's/^ii //; s/ .*//; /^linux[0-9][0-9_.-]*$/p' | sort -V | head -1)
+LTSKERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_lts_kver})
+
 generate_initramfs
 
 print_step "Generating isolinux support for PC-BIOS systems..."
