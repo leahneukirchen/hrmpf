@@ -1,0 +1,275 @@
+#!/bin/sh
+#
+# vim: set ts=4 sw=4 et:
+#
+#-
+# Copyright (c) 2009-2015 Juan Romero Pardines.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+# IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+# NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+# THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#-
+
+readonly PROGNAME=$(basename "$0")
+readonly REQTOOLS="xbps-install tar"
+
+# This script needs to jump around, so we'll remember where we started
+# so that we can get back here
+readonly CURDIR="$(pwd)"
+
+# This source pulls in all the functions from lib.sh.  This set of
+# functions makes it much easier to work with chroots and abstracts
+# away all the problems with running binaries with QEMU.
+# shellcheck source=./lib.sh
+. ./lib.sh
+
+# Die is a function provided in lib.sh which handles the cleanup of
+# the mounts and removal of temporary directories if the running
+# program exists unexpectedly.
+trap 'bailout' INT TERM
+
+bailout() {
+    [ -d "$BOOT_DIR" ] && rm -rf "$BOOT_DIR"
+    die "An unchecked exception has occured!"
+}
+
+usage() {
+    cat <<_EOF
+Usage: $PROGNAME [options] <rootfs>
+
+Options:
+ -r <repo-url>      Use this XBPS repository (may be specified multiple times).
+ -c <cachedir>      Use this XBPS cache directory.
+ -i <lz4|gzip|bzip2|xz> Compression type for the initramfs image (xz if unset).
+ -o <file>          Output file name for the netboot tarball (auto if unset).
+ -K <kernelpkg>     Use <kernelpkg> instead of 'linux' to build the image.
+
+ -k <keymap>        Console keymap to set (us if unset)
+ -l <locale>        Locale to set (en_US.UTF-8 if unset)
+
+ -C "cmdline args"  Add additional kernel command line arguments.
+ -T "title"         Modify the bootloader title.
+ -S "splash image"  Set a custom splash image for the bootloader
+
+The $PROGNAME script generates a network-bootable tarball of Void Linux
+_EOF
+    exit 1
+}
+
+# ########################################
+#      SCRIPT EXECUTION STARTS HERE
+# ########################################
+
+while getopts "r:c:C:T:K:i:o:k:l:Vh" opt; do
+    case $opt in
+        r) XBPS_REPOSITORY="--repository=$OPTARG $XBPS_REPOSITORY";;
+        c) XBPS_CACHEDIR="--cachedir=$OPTARG";;
+        i) INITRAMFS_COMPRESSION="$OPTARG";;
+        K) KERNELPKG="$OPTARG";;
+        o) OUTPUT_FILE="$OPTARG";;
+        k) KEYMAP="$OPTARG";;
+        l) LOCALE="$OPTARG";;
+        C) BOOT_CMDLINE="$OPTARG";;
+        T) BOOT_TITLE="$OPTARG";;
+        S) SPLASH_IMAGE="OPTARG";;
+        V) version; exit 0;;
+        *) usage;;
+    esac
+done
+shift $((OPTIND - 1))
+
+BASE_TARBALL="$1"
+
+# We need to infer the target architecture from the filename.  All
+# other scripts are able to get this from the platforms map because a
+# platform is manually specified.  Since the netboot tarballs target
+# only architectures, its necessary to pull this information from the
+# filename.
+XBPS_TARGET_ARCH=${BASE_TARBALL%%-ROOTFS*}
+XBPS_TARGET_ARCH=${XBPS_TARGET_ARCH##void-}
+
+# Knowing the target arch, we can set the cache up if it hasn't
+# already been set
+set_cachedir
+
+# This is an aweful hack since the script isn't using privesc
+# mechanisms selectively.  This is a TODO item.
+if [ "$(id -u)" -ne 0 ]; then
+    die "need root perms to continue, exiting."
+fi
+
+# Before going any further, check that the tools that are needed are
+# present.  If we delayed this we could check for the QEMU binary, but
+# its a reasonable tradeoff to just bail out now.
+check_tools
+
+# We need to operate on a tempdir, if this fails to create, it is
+# absolutely crucial to bail out so that we don't hose the system that
+# is running the script.
+ROOTFS=$(mktemp -d) || die "failed to create ROOTFS tempdir, exiting..."
+BOOT_DIR=$(mktemp -d) || die "failed to create BOOT_DIR tempdir, exiting..."
+PXELINUX_DIR="$BOOT_DIR/pxelinux.cfg"
+
+# Now that we have a directory for the ROOTFS, we can expand the
+# existing base filesystem into the directory
+info_msg "Expanding base tarball $BASE_TARBALL into $ROOTFS for $PLATFORM build."
+tar xf "$BASE_TARBALL" -C "$ROOTFS"
+
+info_msg "Install additional dracut modules"
+# This section sets up the dracut modules that need to be present on
+# the ROOTFS to build the PXE tarball.  This includes the netmenu
+# module and the autoinstaller
+mkdir -p "$ROOTFS/usr/lib/dracut/modules.d/05netmenu"
+cp dracut/netmenu/* "$ROOTFS/usr/lib/dracut/modules.d/05netmenu/"
+
+# The netmenu can directly launch the manual installer from the
+# initrd.  This is the same installer that's on the live media with
+# all its quirks, oddities, and wierdness.  It's included here for
+# places where you might have a lab network and need to run manual
+# installs from the network.
+cp installer.sh "$ROOTFS/usr/lib/dracut/modules.d/05netmenu/"
+
+# Of course with a PXE environment unattended installs are the norm.
+# The autoinstaller is loaded as a very high priority dracut module
+# and will fail the build if it can't be installed.
+mkdir -p "$ROOTFS/usr/lib/dracut/modules.d/01autoinstaller"
+cp dracut/autoinstaller/* "$ROOTFS/usr/lib/dracut/modules.d/01autoinstaller/"
+
+info_msg "Install kernel and additional required netboot packages"
+# The rootfs has no kernel in it, so it needs to have at the very
+# least dracut, syslinux, and linux installed.  binutils provides
+# /usr/bin/strip which lets us shrink down the size of the initrd
+# dracut-network provides the in-initrd network stack dialog is needed
+# by the install environment.  ${INITRAMFS_COMPRESSION} is the name of
+# the compressor we want to use (lz4 by default).
+if [ -z "${XBPS_TARGET_ARCH##*86*}" ] ; then
+    # This platform is x86 or compatible, we should use
+    # syslinux/pxelinux to boot the system.
+    info_msg "Selecting syslinux bootloader"
+    bootloader_pkg=syslinux
+else
+    # This is likely an arm platform of some kind.  In general these
+    # either have u-boot or a u-boot compatible loader, so we'll use
+    # that to produce a uImage and a uInitrd
+    info_msg "Selecting u-boot bootloader"
+    bootloader_pkg=uboot-mkimage
+fi
+run_cmd_target "xbps-install $XBPS_CONFFILE $XBPS_CACHEDIR $XBPS_REPOSITORY -r $ROOTFS -Sy ${KERNELPKG-linux} dracut binutils dracut-network dialog ${INITRAMFS_COMPRESSION-xz} ${bootloader_pkg}"
+run_cmd_chroot "$ROOTFS" "xbps-reconfigure -a"
+
+# Dracut needs to know the kernel version that will be using this
+# initrd so that it can install the kernel drivers in it.  Normally
+# this check is quite complex, but since this is a clean rootfs and we
+# just installed exactly one kernel, this check can get by with a
+# really naive command to figure out the kernel version
+KERNELVERSION=$(ls "$ROOTFS/usr/lib/modules/")
+
+# Now that things are setup, we can call dracut and build the initrd.
+# This will pretty much step through the normal process to build
+# initrd with the exception that the autoinstaller and netmenu are
+# force added since no module depends on them.
+info_msg "Building initrd for kernel version $KERNELVERSION"
+run_cmd_chroot "$ROOTFS" "env -i /usr/bin/dracut \
+               -N \
+               --${INITRAMFS_COMPRESSION-xz} \
+               --add-drivers ahci \
+               --force-add 'autoinstaller netmenu' \
+               --omit systemd \
+               /boot/initrd \
+               $KERNELVERSION"
+[ $? -ne 0 ] && die "Failed to generate the initramfs"
+
+info_msg "Collect netboot components"
+if [ ${bootloader_pkg} = "syslinux" ] ; then
+    # The whole point of this endeavor is to get the files needed for PXE.
+    # Now that they have been generated, we copy them out of the doomed
+    # ROOTFS and into the $BOOT_DIR where we're staging the rest of the
+    # tarball
+    mv -v "$ROOTFS/boot/initrd" "$BOOT_DIR"
+    cp -v "$ROOTFS/boot/vmlinuz-$KERNELVERSION" "$BOOT_DIR/vmlinuz"
+
+    # The initrd has *very* restrictive permissions by default.  To
+    # prevent some SysAdmin down the road having a very frustrating time
+    # debugging this, we just fix this here and now.
+    chmod 0644 "$BOOT_DIR/initrd"
+
+    # Now we need to grab the rest of the files that go in the tarball.
+    # Some of these are always required, some of these are canonical, and
+    # some of this list is from trial and error.  Either way, this is the
+    # minimum needed to get Void up and booting on metal from the network.
+    for prog in pxelinux.0 ldlinux.c32 libcom32.c32 vesamenu.c32 libutil.c32 chain.c32 ; do
+        cp -v "$ROOTFS/usr/lib/syslinux/$prog" "$BOOT_DIR"
+    done
+
+    # Lastly we need the default pxelinux config and the splash image.
+    # This is user configurable, but if that isn't set then we'll use the
+    # one from data/splash.png instead
+    mkdir -p "$PXELINUX_DIR"
+    cp -f pxelinux.cfg/pxelinux.cfg.in "$PXELINUX_DIR/default"
+    cp -f "${SPLASH_IMAGE-data/splash.png}" "$BOOT_DIR"
+
+    # This sets all the variables in the default config file
+    info_msg "Configuring pxelinux.0 default boot menu"
+    sed -i  -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE-splash.png}")|" \
+        -e "s|@@KERNVER@@|${KERNELVERSION}|" \
+        -e "s|@@KEYMAP@@|${KEYMAP-us}|" \
+        -e "s|@@ARCH@@|$XBPS_TARGET_ARCH|" \
+        -e "s|@@LOCALE@@|${LOCALE-en_US.UTF-8}|" \
+        -e "s|@@BOOT_TITLE@@|${BOOT_TITLE-Void Linux}|" \
+        -e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
+        "$PXELINUX_DIR/default"
+else
+    # u-boot has far far fewer components, but u-boot artifacts do
+    # require some pre-processing
+
+    if [ ! -f "$ROOTFS/boot/uImage" ] ; then
+
+        # Build the uImage, this is really just the kernel with a wrapper
+        # to make u-boot happy.  It also sets the load and entry
+        # addresses, though in general these are overriden by the u-boot
+        # configuration.
+        run_cmd_chroot "$ROOTFS" "env -i /usr/bin/mkimage -A arm -O linux -T kernel -C none -a 0x00000000 -e 0x00000000 -n 'Void Kernel' -d /boot/zImage /boot/uImage"
+
+        # Build the uInitrd which is similarly just a copy of the real
+        # initrd in a format that u-boot is willing to ingest.
+        run_cmd_chroot "$ROOTFS" "env -i /usr/bin/mkimage -A arm -O linux -T ramdisk -C none -a 0 -e 0 -n 'Void Installer Initrd' -d /boot/initrd /boot/uInitrd"
+
+        # Copy out the artifacts that are worth keeping
+        cp "$ROOTFS/boot/uImage" "$BOOT_DIR"
+        cp "$ROOTFS/boot/uInitrd" "$BOOT_DIR"
+        cp -r "$ROOTFS/boot/dtbs" "$BOOT_DIR"
+    else
+        # Copy the existing uImage out
+        cp "$ROOTFS/boot/uImage" "$BOOT_DIR"
+    fi
+fi
+
+# Compress the artifacts for distribution
+OUTPUT_FILE="void-${XBPS_TARGET_ARCH}-NETBOOT-$(date -u +%Y%m%d).tar.gz"
+info_msg "Compressing results to $OUTPUT_FILE"
+cd "$BOOT_DIR" || die "Could not enter image dir"
+tar -zcvf "$CURDIR/$OUTPUT_FILE" .
+cd "$CURDIR" || die "Could not return to working directory"
+
+# As a final cleanup step, remove the ROOTFS and the expanded BOOT_DIR
+info_msg "Cleaning up and removing build directories"
+cleanup_chroot
+[ -d "$ROOTFS" ] && rm -rf "$ROOTFS"
+[ -d "$BOOT_DIR" ] && rm -rf "$BOOT_DIR"

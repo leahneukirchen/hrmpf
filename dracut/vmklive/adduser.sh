@@ -2,11 +2,12 @@
 # -*- mode: shell-script; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
 # ex: ts=8 sw=4 sts=4 et filetype=sh
 
-type getarg >/dev/null 2>&1 || . /lib/dracut-lib.sh
+if ! type getarg >/dev/null 2>&1 && ! type getargbool >/dev/null 2>&1; then
+    . /lib/dracut-lib.sh
+fi
 
 echo hrmpf > ${NEWROOT}/etc/hostname
 
-AUTOLOGIN=$(getarg live.autologin)
 USERNAME=$(getarg live.user)
 USERSHELL=$(getarg live.shell)
 
@@ -32,7 +33,7 @@ chroot ${NEWROOT} sh -c "echo "$USERNAME:voidlinux" | chpasswd -c SHA512"
 
 # Enable sudo permission by default.
 if [ -f ${NEWROOT}/etc/sudoers ]; then
-    echo "${USERNAME} ALL=(ALL) NOPASSWD: ALL" >> ${NEWROOT}/etc/sudoers
+    echo "${USERNAME} ALL=(ALL:ALL) NOPASSWD: ALL" > "${NEWROOT}/etc/sudoers.d/99-void-live"
 fi
 
 if [ -d ${NEWROOT}/etc/polkit-1 ]; then
@@ -51,8 +52,8 @@ _EOF
     chroot ${NEWROOT} chown polkitd:polkitd /etc/polkit-1/rules.d/void-live.rules
 fi
 
-if [ -n "$AUTOLOGIN" ]; then
-        sed -i "s,GETTY_ARGS=\"--noclear\",GETTY_ARGS=\"--noclear -a $USERNAME\",g" ${NEWROOT}/etc/sv/agetty-tty1/run
+if getargbool 0 live.autologin; then
+        sed -i "s,GETTY_ARGS=\"--noclear\",GETTY_ARGS=\"--noclear -a $USERNAME\",g" ${NEWROOT}/etc/sv/agetty-tty1/conf
 fi
 
 chroot ${NEWROOT} usermod -s /bin/bash root

@@ -21,18 +21,23 @@ if [ -d ${NEWROOT}/etc/gdm ]; then
     fi
 fi
 
-# Configure KDM autologin
-if [ -e ${NEWROOT}/etc/kdm/kdmrc ]; then
-    sed -i -e "s|^\#\(AutoLoginEnable=\).*|\1|" ${NEWROOT}/etc/kdm/kdmrc
-    sed -i -e "s|^\#\(AutoLoginUser=\).*|\1$USERNAME|" ${NEWROOT}/etc/kdm/kdmrc
+# Configure sddm autologin for the kde iso.
+if [ -x ${NEWROOT}/usr/bin/sddm ]; then
+    cat > ${NEWROOT}/etc/sddm.conf <<_EOF
+[Autologin]
+User=${USERNAME}
+Session=plasma.desktop
+_EOF
 fi
 
 # Configure lightdm autologin.
-if [ -r ${NEWROOT}/etc/lightdm.conf ]; then
-    sed -i -e "s|^\#\(default-user=\).*|\1$USERNAME|" \
-        ${NEWROOT}/etc/lightdm.conf
-    sed -i -e "s|^\#\(default-user-timeout=\).*|\10|" \
-        ${NEWROOT}/etc/lightdm.conf
+if [ -r "${NEWROOT}/etc/lightdm/lightdm.conf" ]; then
+    sed -i -e "s|^\#\(autologin-user=\).*|\1$USERNAME|" \
+        "${NEWROOT}/etc/lightdm/lightdm.conf"
+    sed -i -e "s|^\#\(autologin-user-timeout=\).*|\10|" \
+        "${NEWROOT}/etc/lightdm/lightdm.conf"
+    sed -i -e "s|^\#\(autologin-session=\).*|\1$(cat "${NEWROOT}/etc/lightdm/.session")|" \
+        "${NEWROOT}/etc/lightdm/lightdm.conf"
 fi
 
 # Configure lxdm autologin.
@@ -52,5 +57,7 @@ if [ -r ${NEWROOT}/etc/lxdm/lxdm.conf ]; then
         sed -e "s,.*session.*=.*,session=/usr/bin/startlxde," -i ${NEWROOT}/etc/lxdm/lxdm.conf
     elif [ -x ${NEWROOT}/usr/bin/startlxqt ]; then
         sed -e "s,.*session.*=.*,session=/usr/bin/startlxqt," -i ${NEWROOT}/etc/lxdm/lxdm.conf
+    elif [ -x ${NEWROOT}/usr/bin/startfluxbox ]; then
+        sed -e "s,.*session.*=.*,session=/usr/bin/startfluxbox," -i ${NEWROOT}/etc/lxdm/lxdm.conf
     fi
 fi

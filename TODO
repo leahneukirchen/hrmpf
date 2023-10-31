@@ -1,3 +1,5 @@
+- iwd?
+
 x syslog to tty12
 - forensic mode (don't touch disks)
 X hrmpf96 (64+32 image, best in the same squashfs and switch_root into
@@ -33,6 +35,9 @@ x hwinfo
 x ipmitool?
 - ipsec-tools?
 
+2023-01-07/P3M quarterly hrmpf release
 
-- update iPXE iso
-- provide netboot.xyz iso? (has HTTPS)
+x run socklog by default
+
+30oct2023::
+- touch empty .vimrc for all users

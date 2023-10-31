@@ -21,7 +21,7 @@ printf '%s\n' '-*' 'e*' 'Eauth.*' 'Eauthpriv.*' > hrmpf-include/var/log/socklog/
 	-C "loglevel=6 printk.time=1 consoleblank=0 net.ifnames=0" \
 	-r https://repo-default.voidlinux.org/current \
 	-r https://repo-default.voidlinux.org/current/nonfree \
-	-S 2048 \
+	-F 2048 \
 	-i zstd \
 	-s "xz -Xbcj x86" \
 	-B extra/balder10.img \
