@@ -299,7 +299,7 @@ generate_squashfs() {
     mkdir -p "$IMAGEDIR/LiveOS"
 
     "$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR/tmp" "$IMAGEDIR/LiveOS/squashfs.img" \
-        -comp "${SQUASHFS_COMPRESSION}" || die "Failed to generate squashfs image"
+        -comp ${SQUASHFS_COMPRESSION} || die "Failed to generate squashfs image"
     chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 
     # Remove rootfs and temporary dirs, we don't need them anymore.
@@ -323,7 +323,7 @@ generate_iso_image() {
 #
 # main()
 #
-while getopts "a:A:b:B:r:c:C:F:T:Kk:l:i:I:s:o:p:v:Vh" opt; do
+while getopts "a:A:b:B:r:c:C:F:T:Kk:l:i:I:s:S:o:p:v:Vh" opt; do
     case $opt in
         a) BASE_ARCH="$OPTARG";;
         A) ALTERNATIVES="$OPTARG";;
@@ -431,7 +431,7 @@ _linux_series=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITOR
 _kver=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -p pkgver ${_linux_series})
 KERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_kver})
 
-_linux_lts_series=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -x linux-lts|head -1)
+_linux_lts_series=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -x linux-lts|grep -v linux-base |head -1)
 _lts_kver=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -p pkgver ${_linux_lts_series})
 LTSKERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_lts_kver})
 
@@ -439,7 +439,7 @@ if [ "$?" -ne "0" ]; then
     die "Failed to find kernel package version"
 fi
 
-: ${OUTPUT_FILE="void-live-${BASE_ARCH}-${KERNELVERSION}-$(date -u +%Y%m%d).iso"}
+: ${OUTPUT_FILE="hrmpf-${BASE_ARCH}-${KERNELVERSION}-$(date -u +%Y%m%d).iso"}
 
 print_step "Installing software to generate the image: ${REQUIRED_PKGS} ..."
 install_prereqs
