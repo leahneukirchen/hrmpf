@@ -38,7 +38,7 @@ if [ cpuid -l ]; then
 		linux (${voidlive})/boot/vmlinuz \
 		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
 		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
-		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ live.autologin \
 		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
 		initrd (${voidlive})/boot/initrd
 	}
@@ -47,47 +47,9 @@ if [ cpuid -l ]; then
 		linux (${voidlive})/boot/vmlinuz \
 		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
 		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
-		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ live.autologin \
 		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
 		initrd (${voidlive})/boot/initrd
-	}
-	menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (Serial)" {
-		set gfxpayload="keep"
-		linux (${voidlive})/boot/vmlinuz \
-		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
-		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
-		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
-		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ \
-		console=tty0 console=ttyS0,115200n8
-		initrd (${voidlive})/boot/initrd
-	}
-	menuentry "@@BOOT_TITLE@@ @@LTSKVER@@ LTS (@@ARCH@@)" {
-		set gfxpayload="keep"
-		linux (${voidlive})/boot/vmlinuz-lts \
-		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
-		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
-		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
-		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
-		initrd (${voidlive})/boot/initrd-lts
-	}
-	menuentry "@@BOOT_TITLE@@ @@LTSKVER@@ LTS (@@ARCH@@) (RAM)" {
-		set gfxpayload="keep"
-		linux (${voidlive})/boot/vmlinuz-lts \
-		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
-		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
-		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
-		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
-		initrd (${voidlive})/boot/initrd-lts
-	}
-	menuentry "@@BOOT_TITLE@@ @@LTSKVER@@ LTS (@@ARCH@@) (Serial)" {
-		set gfxpayload="keep"
-		linux (${voidlive})/boot/vmlinuz-lts \
-		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
-		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
-		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
-		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ \
-		console=tty0 console=ttyS0,115200n8
-		initrd (${voidlive})/boot/initrd-lts
 	}
 	menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) with speech" --hotkey s --id "linuxa11y" {
 		set gfxpayload="keep"
@@ -106,6 +68,62 @@ if [ cpuid -l ]; then
 		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
 		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin rd.live.ram
 		initrd (${voidlive})/boot/initrd
+	}
+	menuentry "@@BOOT_TITLE@@ @@KERNVER@@ (@@ARCH@@) (Serial)" {
+		set gfxpayload="keep"
+		linux (${voidlive})/boot/vmlinuz \
+		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
+		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ live.autologin \
+		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ \
+		console=tty0 console=ttyS0,115200n8
+		initrd (${voidlive})/boot/initrd
+	}
+	menuentry "@@BOOT_TITLE@@ @@LTSKVER@@ LTS (@@ARCH@@)" {
+		set gfxpayload="keep"
+		linux (${voidlive})/boot/vmlinuz-lts \
+		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
+		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ live.autologin \
+		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@
+		initrd (${voidlive})/boot/initrd-lts
+	}
+	menuentry "@@BOOT_TITLE@@ @@LTSKVER@@ LTS (@@ARCH@@) (RAM)" {
+		set gfxpayload="keep"
+		linux (${voidlive})/boot/vmlinuz-lts \
+		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
+		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ live.autologin \
+		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ rd.live.ram
+		initrd (${voidlive})/boot/initrd-lts
+	}
+	menuentry "@@BOOT_TITLE@@ @@LTSKVER@@ LTS (@@ARCH@@) (Serial)" {
+		set gfxpayload="keep"
+		linux (${voidlive})/boot/vmlinuz-lts \
+		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
+		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ live.autologin \
+		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ \
+		console=tty0 console=ttyS0,115200n8
+		initrd (${voidlive})/boot/initrd-lts
+	}
+	menuentry "@@BOOT_TITLE@@ @@LTSKVER@@ (@@ARCH@@) with speech" {
+		set gfxpayload="keep"
+		linux (${voidlive})/boot/vmlinuz-lts \
+		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
+		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
+		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin
+		initrd (${voidlive})/boot/initrd-lts
+	}
+	menuentry "@@BOOT_TITLE@@ @@LTSKVER@@ (@@ARCH@@) with speech (RAM)" {
+		set gfxpayload="keep"
+		linux (${voidlive})/boot/vmlinuz-lts \
+		root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \
+		rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \
+		vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ \
+		locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin rd.live.ram
+		initrd (${voidlive})/boot/initrd-lts
 	}
 	if [ "${grub_platform}" == "efi" ]; then
 		menuentry "Run Memtest86+ (RAM test)" --id memtest {
