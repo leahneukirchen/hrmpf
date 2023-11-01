@@ -40,4 +40,10 @@ x ipmitool?
 x run socklog by default
 
 30oct2023::
-- touch empty .vimrc for all users
+x touch empty .vimrc for all users
+x autologin
+x revert to menu.c32
+x enable binfmt-support
+x enable acpid
+x move speech over LTS
+x add speech for LTS
