@@ -31,4 +31,5 @@ printf '%s\n' '-*' 'e*' 'Eauth.*' 'Eauthpriv.*' > hrmpf-include/var/log/socklog/
 	-B extra/grub2.iso \
 	-p "$(grep '^[^#].' hrmpf.packages)" \
 	-A "gawk tnftp inetutils-hostname libressl-netcat dash vim-common" \
+	-S "acpid binfmt-support dhcpcd gpm sshd" \
 	-I hrmpf-include \
