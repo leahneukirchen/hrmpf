@@ -203,11 +203,13 @@ generate_isolinux_boot() {
     cp -f "$SYSLINUX_DATADIR"/ldlinux.c32 "$ISOLINUX_DIR"
     cp -f "$SYSLINUX_DATADIR"/libcom32.c32 "$ISOLINUX_DIR"
     cp -f "$SYSLINUX_DATADIR"/menu.c32 "$ISOLINUX_DIR"
+    cp -f "$SYSLINUX_DATADIR"/hdt.c32 "$ISOLINUX_DIR"
     cp -f "$SYSLINUX_DATADIR"/vesamenu.c32 "$ISOLINUX_DIR"
     cp -f "$SYSLINUX_DATADIR"/libutil.c32 "$ISOLINUX_DIR"
     cp -f "$SYSLINUX_DATADIR"/chain.c32 "$ISOLINUX_DIR"
     cp -f "$SYSLINUX_DATADIR"/reboot.c32 "$ISOLINUX_DIR"
     cp -f "$SYSLINUX_DATADIR"/poweroff.c32 "$ISOLINUX_DIR"
+    cp -f "$SYSLINUX_DATADIR"/memdisk "$ISOLINUX_DIR"
     cp -f isolinux/isolinux.cfg.in "$ISOLINUX_DIR"/isolinux.cfg
     cp -f ${SPLASH_IMAGE} "$ISOLINUX_DIR"
 

@@ -10,13 +10,7 @@ MENU AUTOBOOT BIOS default device boot in # second{,s}...
 MENU BACKGROUND @@SPLASHIMAGE@@
 MENU WIDTH 78
 MENU MARGIN 1
-MENU ROWS 9
 MENU VSHIFT 2
-MENU TIMEOUTROW 13
-MENU TABMSGROW 2
-MENU CMDLINEROW 16
-MENU HELPMSGROW 20
-MENU HELPMSGENDROW 34
 
 #MENU COLOR title        * #FF5255FF *
 #MENU COLOR border       * #00000000 #00000000 none
@@ -31,7 +25,7 @@ MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (RAM)
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin rd.live.ram
 LABEL linuxtext
-MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (Text mode/Serial)
+MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (^Text mode/Serial)
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin modprobe.blacklist=bochs_drm nomodeset console=tty0 console=ttyS0,115200n8
 LABEL linuxa11y
@@ -59,7 +53,7 @@ MENU LABEL @@BOOT_TITLE@@ @@LTSKVER@@ LTS @@ARCH@@ with speech
 KERNEL /boot/vmlinuz-lts
 APPEND initrd=/boot/initrd-lts root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin
 LABEL linuxa11yram
-MENU LABEL @@BOOT_TITLE@@ @@LTSKNVER@@ LTS @@ARCH@@ with speech (RAM)
+MENU LABEL @@BOOT_TITLE@@ @@LTSKVER@@ LTS @@ARCH@@ with speech (RAM)
 KERNEL /boot/vmlinuz-lts
 APPEND initrd=/boot/initrd-lts root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin rd.live.ram
 LABEL hdt
@@ -95,10 +89,6 @@ LABEL c
 MENU LABEL Boot first HD found by BIOS
 COM32 chain.c32
 APPEND hd0
-
-LABEL memtest
-MENU LABEL Run Memtest86+ (RAM test)
-LINUX /boot/memtest.bin
 
 LABEL reboot
 MENU LABEL Reboot
