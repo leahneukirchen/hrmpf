@@ -14,7 +14,8 @@ printf '%s\n' '#!/bin/sh' 'exec svlogd -ttt /var/log/socklog/* 2>/dev/tty12' > h
 chmod +x hrmpf-include/etc/sv/socklog-unix/log/run
 mkdir -p hrmpf-include/var/log/socklog/tty12
 printf '%s\n' '-*' 'e*' 'Eauth.*' 'Eauthpriv.*' > hrmpf-include/var/log/socklog/tty12/config
-
+mkdir -p hrmpf-include/etc/skel hrmpf-include/root
+touch hrmpf-include/etc/skel/.vimrc hrmpf-include/root/.vimrc
 
 ./mklive.sh \
 	-T "hrmpf live/rescue system" \
