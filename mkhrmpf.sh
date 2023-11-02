@@ -34,3 +34,4 @@ touch hrmpf-include/etc/skel/.vimrc hrmpf-include/root/.vimrc
 	-A "gawk tnftp inetutils-hostname libressl-netcat dash vim-common" \
 	-S "acpid binfmt-support dhcpcd gpm sshd" \
 	-I hrmpf-include \
+	"$@"
