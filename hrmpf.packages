@@ -210,6 +210,7 @@ grep
 hostmux
 icdiff
 inotify-tools
+intel-ucode
 irqbalance
 jo
 jq
