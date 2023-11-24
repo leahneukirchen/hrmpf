@@ -244,7 +244,7 @@ generate_grub_efi_boot() {
     modprobe -q loop || :
 
     # Create EFI vfat image.
-    truncate -s 32M "$GRUB_DIR"/efiboot.img >/dev/null 2>&1
+    truncate -s 128M "$GRUB_DIR"/efiboot.img >/dev/null 2>&1
     mkfs.vfat -F12 -S 512 -n "grub_uefi" "$GRUB_DIR/efiboot.img" >/dev/null 2>&1
 
     GRUB_EFI_TMPDIR="$(mktemp --tmpdir="$HOME" -d)"
