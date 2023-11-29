@@ -17,6 +17,10 @@ printf '%s\n' '-*' 'e*' 'Eauth.*' 'Eauthpriv.*' > hrmpf-include/var/log/socklog/
 mkdir -p hrmpf-include/etc/skel hrmpf-include/root
 touch hrmpf-include/etc/skel/.vimrc hrmpf-include/root/.vimrc
 
+mkdir -p hrmpf-include/usr/bin
+sed "s/@@MKLIVE_VERSION@@/$(date -u +%Y%m%d)/g" < installer.sh > hrmpf-include/usr/bin/void-installer
+chmod 0755 hrmpf-include/usr/bin/void-installer
+
 ./mklive.sh \
 	-T "hrmpf live/rescue system" \
 	-C "loglevel=6 printk.time=1 consoleblank=0 net.ifnames=0" \
