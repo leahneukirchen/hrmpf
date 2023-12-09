@@ -275,6 +275,7 @@ shmux
 sispmctl
 snooze
 socklog-void
+sof-firmware
 su-exec
 sudo
 tab
