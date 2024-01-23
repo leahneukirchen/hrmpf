@@ -172,7 +172,6 @@ colordiff
 convmv
 cpulimit
 cpupower
-crda
 cronie
 curl
 daemonize
@@ -530,7 +529,6 @@ rsync
 snapraid
 snazzer
 unison
-zbackup
 zpaq
 
 # shells
