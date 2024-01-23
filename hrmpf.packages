@@ -210,6 +210,7 @@ hostmux
 icdiff
 inotify-tools
 intel-ucode
+ipgrep
 irqbalance
 jo
 jq
@@ -228,6 +229,7 @@ metalog
 miller
 minised
 ministat
+mlog
 mmv
 msrc_base
 mtm
@@ -604,6 +606,7 @@ tftp-hpa
 tinyproxy
 unbound
 wireguard-tools
+wstunnel
 xinetd
 
 # office
