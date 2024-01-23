@@ -16,6 +16,8 @@ mkdir -p hrmpf-include/var/log/socklog/tty12
 printf '%s\n' '-*' 'e*' 'Eauth.*' 'Eauthpriv.*' > hrmpf-include/var/log/socklog/tty12/config
 mkdir -p hrmpf-include/etc/skel hrmpf-include/root
 touch hrmpf-include/etc/skel/.vimrc hrmpf-include/root/.vimrc
+mkdir -p hrmpf-include/etc/sysctl.d
+touch hrmpf-include/etc/sysctl.d/10-void-user.conf
 
 mkdir -p hrmpf-include/usr/bin
 sed "s/@@MKLIVE_VERSION@@/$(date -u +%Y%m%d)/g" < installer.sh > hrmpf-include/usr/bin/void-installer
