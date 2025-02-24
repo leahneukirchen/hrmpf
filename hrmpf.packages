@@ -1,14 +1,12 @@
 # lts kernel
-linux5.15
-linux5.15-headers
+linux6.1
+linux6.1-headers
 
 # diagnosis
 acpi
 atop
 blktrace
 bonnie++
-cpuburn
-cpuinfo
 diskscan
 dmidecode
 dstat
@@ -16,7 +14,6 @@ extrace
 f3
 fatrace
 fio
-hdapsd
 hddtemp
 htop
 hwinfo
@@ -32,10 +29,7 @@ lshw
 lsof
 lsscsi
 ltrace
-mcelog
-mei-amt-check
 memtester
-msr-tools
 nethogs
 pciutils
 powertop
@@ -119,7 +113,6 @@ pchar
 polysh
 ppp
 pptpclient
-procmail
 radvd
 redsocks
 rpcbind
@@ -188,7 +181,6 @@ dtach
 duff
 dvtm
 earlyoom
-efmd
 entr
 etckeeper
 execline
@@ -209,7 +201,6 @@ grep
 hostmux
 icdiff
 inotify-tools
-intel-ucode
 ipgrep
 irqbalance
 jo
@@ -231,7 +222,6 @@ minised
 ministat
 mlog
 mmv
-msrc_base
 mtm
 multitail
 multitime
@@ -243,7 +233,6 @@ nsjail
 numactl
 odo
 opendoas
-oue
 outils
 par
 parallel
@@ -276,7 +265,6 @@ shmux
 sispmctl
 snooze
 socklog-void
-sof-firmware
 su-exec
 sudo
 tab
@@ -353,15 +341,10 @@ zfs
 efibootmgr
 efitools
 efivar
-grub
-grub-i386-efi
-grub-x86_64-efi
-gummiboot
-lilo
+systemd-boot
 ms-sys
 sbctl
 sbsigntool
-syslinux
 vboot-utils
 
 # archives
@@ -388,7 +371,6 @@ rpmextract
 sharutils
 tar
 unp
-unrar
 unzip
 xz
 zip
@@ -499,11 +481,9 @@ cmus-flac
 cmus-libao
 cmus-mpc
 cpat
-crawl
 ddate
 libao-sndio
 mpg123
-nethack
 nudoku
 rogue
 sndio
@@ -516,7 +496,6 @@ attic
 backupninja
 borg
 btrbk
-bup
 csync2
 dar
 duplicity
@@ -530,14 +509,11 @@ rsnapshot
 rsync
 snapraid
 snazzer
-unison
 zpaq
 
 # shells
 dash
-es
 fish-shell
-ksh
 mksh
 pdmenu
 posh
@@ -550,7 +526,6 @@ zsh
 dte
 e3
 ed
-emacs
 ex-vi
 jupp
 mg
@@ -585,7 +560,6 @@ sacc
 sic
 tin
 tnftp
-trn
 w3m
 weechat
 
