@@ -225,25 +225,31 @@ generate_initramfs() {
 
     copy_dracut_files "$ROOTFS"
     copy_autoinstaller_files "$ROOTFS"
-    chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
-        --add-drivers "ahci" --force-add "vmklive livenet autoinstaller" --omit systemd "/boot/initrd-lts" $LTSKERNELVERSION
-    [ $? -ne 0 ] && die "Failed to generate the initramfs"
+    if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
+        chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
+            --add-drivers "ahci" --force-add "vmklive livenet autoinstaller" --omit systemd "/boot/initrd-lts" $LTSKERNELVERSION
+        [ $? -ne 0 ] && die "Failed to generate the initramfs"
+    fi
     chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
         --add-drivers "ahci" --force-add "vmklive livenet autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION
     [ $? -ne 0 ] && die "Failed to generate the initramfs"
 
-    mv "$ROOTFS"/boot/initrd-lts "$BOOT_DIR"
+    if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
+        mv "$ROOTFS"/boot/initrd-lts "$BOOT_DIR"
+    fi
     mv "$ROOTFS"/boot/initrd "$BOOT_DIR"
 
-    cp "$ROOTFS"/boot/vmlinuz-$LTSKERNELVERSION "$BOOT_DIR"/vmlinuz-lts
-    cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz
 	case "$TARGET_ARCH" in
 		i686*|x86_64*)
-            cp "$ROOTFS/boot/vmlinuz-$LTSKERNELVERSION" "$BOOT_DIR"/vmlinuz-lts
+            if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
+                cp "$ROOTFS/boot/vmlinuz-$LTSKERNELVERSION" "$BOOT_DIR"/vmlinuz-lts
+            fi
             cp "$ROOTFS/boot/vmlinuz-$KERNELVERSION" "$BOOT_DIR"/vmlinuz
             ;;
 		aarch64*)
-            cp "$ROOTFS/boot/vmlinux-$LTSKERNELVERSION" "$BOOT_DIR"/vmlinux-lts
+            if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
+                cp "$ROOTFS/boot/vmlinux-$LTSKERNELVERSION" "$BOOT_DIR"/vmlinux-lts
+            fi
             cp "$ROOTFS/boot/vmlinux-$KERNELVERSION" "$BOOT_DIR"/vmlinux
             ;;
 	esac
@@ -338,16 +344,18 @@ EOF
         write_entry "${ENTRY_TITLE} (graphics disabled)" "linuxnogfx${id_sfx}" \
             "live.autologin nomodeset $BOOT_CMDLINE $cmdline" "$dtb"
 
-        ENTRY_TITLE="${BOOT_TITLE} ${LTSKERNELVERSION} ${title_sfx}(${TARGET_ARCH})"
+        if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
+            ENTRY_TITLE="${BOOT_TITLE} ${LTSKERNELVERSION} ${title_sfx}(${TARGET_ARCH})"
 
-        KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS" "linuxlts${id_sfx}" \
-            "live.autologin $BOOT_CMDLINE $cmdline" "$dtb"
-        KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS (RAM)" "linuxltsram${id_sfx}" \
-            "live.autologin rd.live.ram $BOOT_CMDLINE $cmdline" "$dtb"
-        KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS (Serial)" "linuxltsserial${id_sfx}" \
-            "live.autologin rd.live.ram $BOOT_CMDLINE $cmdline console=tty0 console=ttyS0,115200n8" "$dtb"
-        KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS (graphics disabled)" "linuxltsnogfx${id_sfx}" \
-            "live.autologin nomodeset $BOOT_CMDLINE $cmdline" "$dtb"
+            KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS" "linuxlts${id_sfx}" \
+                "live.autologin $BOOT_CMDLINE $cmdline" "$dtb"
+            KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS (RAM)" "linuxltsram${id_sfx}" \
+                "live.autologin rd.live.ram $BOOT_CMDLINE $cmdline" "$dtb"
+            KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS (Serial)" "linuxltsserial${id_sfx}" \
+                "live.autologin rd.live.ram $BOOT_CMDLINE $cmdline console=tty0 console=ttyS0,115200n8" "$dtb"
+            KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS (graphics disabled)" "linuxltsnogfx${id_sfx}" \
+                "live.autologin nomodeset $BOOT_CMDLINE $cmdline" "$dtb"
+        fi
 
         ENTRY_TITLE="${BOOT_TITLE} ${KERNELVERSION} ${title_sfx}(${TARGET_ARCH})"
 

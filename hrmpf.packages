@@ -1,7 +1,3 @@
-# lts kernel
-linux6.1
-linux6.1-headers
-
 # diagnosis
 acpi
 atop
@@ -464,7 +460,6 @@ ired
 jhead
 lz4jsoncat
 mtree
-qemu-user-static
 pev
 pixd
 rhash

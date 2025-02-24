@@ -1,3 +1,8 @@
+# lts kernel
+# some aarch64 targets don't support older kernels
+linux6.1
+linux6.1-headers
+
 # diagnosis
 cpuburn
 cpuinfo
@@ -25,6 +30,10 @@ syslinux
 
 # archives
 unrar
+
+# rescue & forensics
+# cannot be installed when crossbuilding an image
+qemu-user
 
 # entertainment
 crawl
