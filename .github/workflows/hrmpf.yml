@@ -42,7 +42,7 @@ jobs:
             sed 's/\s\+/ /g' | jq -Rrc 'split(" ")'
           }
 
-          echo "archs=$(echo "${{ inputs.archs }}" | jsonify)" >> $GITHUB_OUTPUT
+          echo "archs=$(echo ${{ inputs.archs }} | jsonify)" >> $GITHUB_OUTPUT
 
   build-hrmpf:
     name: Build Hrmpf ISOs
