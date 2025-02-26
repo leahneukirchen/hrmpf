@@ -33,6 +33,17 @@ mkdir -p hrmpf-include/var/log/socklog/tty12
 printf '%s\n' '-*' 'e*' 'Eauth.*' 'Eauthpriv.*' > hrmpf-include/var/log/socklog/tty12/config
 mkdir -p hrmpf-include/etc/skel hrmpf-include/root
 touch hrmpf-include/etc/skel/.vimrc hrmpf-include/root/.vimrc
+cat << 'EOF' >> hrmpf-include/etc/skel/.bash_profile
+[ -f $HOME/.bashrc ] && . $HOME/.bashrc
+EOF
+cp hrmpf-include/etc/skel/.bash_profile hrmpf-include/root/.bash_profile
+cat << 'EOF' >> hrmpf-include/etc/skel/.bashrc
+[[ $- != *i* ]] && return
+PROMPT_COMMAND='history -a'
+PROMPT_DIRTRIM=2
+PS1='[\u@\h \w]\$ '
+EOF
+cp hrmpf-include/etc/skel/.bashrc hrmpf-include/root/.bashrc
 mkdir -p hrmpf-include/etc/sysctl.d
 touch hrmpf-include/etc/sysctl.d/10-void-user.conf
 
