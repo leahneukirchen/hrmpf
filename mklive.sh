@@ -322,7 +322,7 @@ menuentry "${entrytitle}" --id "${id}" ${hotkey:+--hotkey $hotkey} {
         root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \\
         rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \\
         vconsole.unicode=1 vconsole.keymap=${KEYMAP} locale.LANG=${LOCALE} ${cmdline}
-    initrd (\${voidlive})/boot/initrd
+    initrd (\${voidlive})/boot/${INITRD_IMG:-initrd}
 EOF
         if [ -n "${dtb}" ]; then
             printf '    devicetree (${voidlive})/boot/dtbs/%s\n' "${dtb}" >> "$GRUB_DIR"/grub_void.cfg
@@ -347,13 +347,17 @@ EOF
         if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
             ENTRY_TITLE="${BOOT_TITLE} ${LTSKERNELVERSION} ${title_sfx}(${TARGET_ARCH})"
 
-            KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS" "linuxlts${id_sfx}" \
+            KERNEL_IMG="${KERNEL_IMG}-lts" INITRD_IMG="initrd-lts" \
+                write_entry "${ENTRY_TITLE} LTS" "linuxlts${id_sfx}" \
                 "live.autologin $BOOT_CMDLINE $cmdline" "$dtb"
-            KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS (RAM)" "linuxltsram${id_sfx}" \
+            KERNEL_IMG="${KERNEL_IMG}-lts" INITRD_IMG="initrd-lts" \
+                write_entry "${ENTRY_TITLE} LTS (RAM)" "linuxltsram${id_sfx}" \
                 "live.autologin rd.live.ram $BOOT_CMDLINE $cmdline" "$dtb"
-            KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS (Serial)" "linuxltsserial${id_sfx}" \
+            KERNEL_IMG="${KERNEL_IMG}-lts" INITRD_IMG="initrd-lts" \
+                write_entry "${ENTRY_TITLE} LTS (Serial)" "linuxltsserial${id_sfx}" \
                 "live.autologin rd.live.ram $BOOT_CMDLINE $cmdline console=tty0 console=ttyS0,115200n8" "$dtb"
-            KERNEL_IMG="${KERNEL_IMG}-lts" write_entry "${ENTRY_TITLE} LTS (graphics disabled)" "linuxltsnogfx${id_sfx}" \
+            KERNEL_IMG="${KERNEL_IMG}-lts" INITRD_IMG="initrd-lts" \
+                write_entry "${ENTRY_TITLE} LTS (graphics disabled)" "linuxltsnogfx${id_sfx}" \
                 "live.autologin nomodeset $BOOT_CMDLINE $cmdline" "$dtb"
         fi
 
