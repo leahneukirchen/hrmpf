@@ -1,0 +1,54 @@
+# lts kernel
+# some aarch64 targets don't support older kernels
+linux6.1
+linux6.1-headers
+
+# diagnosis
+cpuburn
+cpuinfo
+hdapsd
+mcelog
+mei-amt-check
+msr-tools
+
+# networking
+procmail
+
+# general system tools
+efmd
+intel-ucode
+msrc_base
+oue
+sof-firmware
+
+# bootloader
+grub
+grub-i386-efi
+grub-x86_64-efi
+lilo
+syslinux
+
+# archives
+unrar
+
+# rescue & forensics
+# cannot be installed when crossbuilding an image
+qemu-user
+
+# entertainment
+crawl
+nethack
+
+# backup
+bup
+unison
+
+# shells
+es
+ksh
+
+# text editors
+emacs
+
+# clients
+trn

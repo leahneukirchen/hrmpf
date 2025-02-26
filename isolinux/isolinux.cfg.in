@@ -10,6 +10,7 @@ MENU AUTOBOOT BIOS default device boot in # second{,s}...
 MENU BACKGROUND @@SPLASHIMAGE@@
 MENU WIDTH 78
 MENU MARGIN 1
+MENU ROWS 12
 MENU VSHIFT 2
 
 #MENU COLOR title        * #FF5255FF *
@@ -28,6 +29,12 @@ LABEL linuxtext
 MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (^Text mode/Serial)
 KERNEL /boot/vmlinuz
 APPEND initrd=/boot/initrd root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin modprobe.blacklist=bochs_drm nomodeset console=tty0 console=ttyS0,115200n8
+
+LABEL linuxnogfx
+MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ (graphics disabled)
+KERNEL /boot/vmlinuz
+APPEND initrd=/boot/initrd root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.autologin nomodeset
+
 LABEL linuxa11y
 MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ with ^speech
 KERNEL /boot/vmlinuz
@@ -56,6 +63,11 @@ LABEL linuxa11yram
 MENU LABEL @@BOOT_TITLE@@ @@LTSKVER@@ LTS @@ARCH@@ with speech (RAM)
 KERNEL /boot/vmlinuz-lts
 APPEND initrd=/boot/initrd-lts root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin rd.live.ram
+LABEL linuxa11ynogfx
+MENU LABEL @@BOOT_TITLE@@ @@KERNVER@@ @@ARCH@@ with speech (^graphics disabled)
+KERNEL /boot/vmlinuz
+APPEND initrd=/boot/initrd root=live:CDLABEL=VOID_LIVE init=/sbin/init ro rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 vconsole.unicode=1 vconsole.keymap=@@KEYMAP@@ locale.LANG=@@LOCALE@@ @@BOOT_CMDLINE@@ live.accessibility live.autologin nomodeset
+
 LABEL hdt
 MENU LABEL HDT (Hardware Detection Tool)
 KERNEL hdt.c32
@@ -91,9 +103,9 @@ COM32 chain.c32
 APPEND hd0
 
 LABEL reboot
-MENU LABEL Reboot
+MENU LABEL Re^boot
 COM32 reboot.c32
 
 LABEL poweroff
-MENU LABEL Power Off
+MENU LABEL ^Power Off
 COM32 poweroff.c32

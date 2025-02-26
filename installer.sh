@@ -50,6 +50,7 @@ if [ ! -f $CONF_FILE ]; then
     touch -f $CONF_FILE
 fi
 ANSWER=$(mktemp -t vinstall-XXXXXXXX || exit 1)
+TARGET_SERVICES=$(mktemp -t vinstall-sv-XXXXXXXX || exit 1)
 TARGET_FSTAB=$(mktemp -t vinstall-fstab-XXXXXXXX || exit 1)
 
 trap "DIE" INT TERM QUIT
@@ -112,7 +113,7 @@ DIE() {
     rval=$1
     [ -z "$rval" ] && rval=0
     clear
-    rm -f $ANSWER $TARGET_FSTAB
+    rm -f $ANSWER $TARGET_FSTAB $TARGET_SERVICES
     # reenable printk
     if [ -w /proc/sys/kernel/printk ]; then
         echo 4 >/proc/sys/kernel/printk
@@ -122,14 +123,14 @@ DIE() {
 }
 
 set_option() {
-    if grep -Eq "^${1}.*" $CONF_FILE; then
-        sed -i -e "/^${1}.*/d" $CONF_FILE
+    if grep -Eq "^${1} .*" $CONF_FILE; then
+        sed -i -e "/^${1} .*/d" $CONF_FILE
     fi
     echo "${1} ${2}" >>$CONF_FILE
 }
 
 get_option() {
-    echo $(grep -E "^${1}.*" $CONF_FILE|sed -e "s|${1}||")
+    grep -E "^${1} .*" $CONF_FILE | sed -e "s|^${1} ||"
 }
 
 # ISO-639 language names for locales
@@ -365,7 +366,7 @@ get_partfs() {
     # that the user is shown the proper fs type if they install the system.
     local part="$1"
     local default="${2:-none}"
-    local fstype=$(grep "MOUNTPOINT ${part}" "$CONF_FILE"|awk '{print $3}')
+    local fstype=$(grep "MOUNTPOINT ${part} " "$CONF_FILE"|awk '{print $3}')
     echo "${fstype:-$default}"
 }
 
@@ -481,9 +482,9 @@ menu_filesystems() {
             local bdev=$(basename $dev)
             local ddev=$(basename $(dirname $dev))
             if [ "$ddev" != "dev" ]; then
-                sed -i -e "/^MOUNTPOINT \/dev\/${ddev}\/${bdev}.*/d" $CONF_FILE
+                sed -i -e "/^MOUNTPOINT \/dev\/${ddev}\/${bdev} .*/d" $CONF_FILE
             else
-                sed -i -e "/^MOUNTPOINT \/dev\/${bdev}.*/d" $CONF_FILE
+                sed -i -e "/^MOUNTPOINT \/dev\/${bdev} .*/d" $CONF_FILE
             fi
             echo "MOUNTPOINT $dev $1 $2 $3 $4" >>$CONF_FILE
         fi
@@ -506,17 +507,19 @@ menu_partitions() {
 
             DIALOG --title "Modify Partition Table on $device" --msgbox "\n
 ${BOLD}${software} will be executed in disk $device.${RESET}\n\n
-For BIOS systems, MBR or GPT partition tables are supported.\n
-To use GPT on PC BIOS systems an empty partition of 1MB must be added\n
-at the first 2GB of the disk with the TOGGLE \`bios_grub' enabled.\n
+For BIOS systems, MBR or GPT partition tables are supported. To use GPT\n
+on PC BIOS systems, an empty partition of 1MB must be added at the first\n
+2GB of the disk with the partition type \`BIOS Boot'.\n
 ${BOLD}NOTE: you don't need this on EFI systems.${RESET}\n\n
-For EFI systems GPT is mandatory and a FAT32 partition with at least\n
-100MB must be created with the TOGGLE \`boot', this will be used as\n
-EFI System Partition. This partition must have mountpoint as \`/boot/efi'.\n\n
-At least 1 partition is required for the rootfs (/).\n
-For swap, RAM*2 must be really enough. For / 600MB are required.\n\n
+For EFI systems, GPT is mandatory and a FAT32 partition with at least 100MB\n
+must be created with the partition type \`EFI System'. This will be used as\n
+the EFI System Partition. This partition must have the mountpoint \`/boot/efi'.\n\n
+At least 1 partition is required for the rootfs (/). For this partition,\n
+at least 2GB is required, but more is recommended. The rootfs partition\n
+should have the partition type \`Linux Filesystem'. For swap, RAM*2\n
+should be enough and the partition type \`Linux swap' should be used.\n\n
 ${BOLD}WARNING: /usr is not supported as a separate partition.${RESET}\n
-${RESET}\n" 18 80
+${RESET}\n" 23 80
             if [ $? -eq 0 ]; then
                 while true; do
                     clear; $software $device; PARTITIONS_DONE=1
@@ -744,7 +747,7 @@ menu_useraccount() {
         fi
     done
 
-    _groups="wheel,audio,video,floppy,cdrom,optical,kvm,xbuilder"
+    _groups="wheel,audio,video,floppy,cdrom,optical,kvm,users,xbuilder"
     while true; do
         _desc="Select group membership for login '$(get_option USERLOGIN)':"
         for _group in $(cat /etc/group); do
@@ -757,7 +760,7 @@ menu_useraccount() {
                 _status=on
             fi
             # ignore the groups of root, existing users, and package groups
-            if [[ "${_gid}" -ge 1000 || "${_group}" = "_"* || "${_group}" = "root" ]]; then
+            if [[ "${_gid}" -ge 1000 || "${_group}" = "_"* || "${_group}" =~ ^(root|nogroup|chrony|dbus|lightdm|polkitd)$ ]]; then
                 continue
             fi
             if [ -z "${_checklist}" ]; then
@@ -1021,7 +1024,7 @@ validate_filesystems() {
     local bootdev=$(get_option BOOTLOADER)
 
     unset TARGETFS
-    mnts=$(grep -E '^MOUNTPOINT.*' $CONF_FILE)
+    mnts=$(grep -E '^MOUNTPOINT .*' $CONF_FILE)
     set -- ${mnts}
     while [ $# -ne 0 ]; do
         fmt=""
@@ -1064,7 +1067,7 @@ as FAT32, mountpoint /boot/efi and at least with 100MB of size." ${MSGBOXSIZE}
 create_filesystems() {
     local mnts dev mntpt fstype fspassno mkfs size rv uuid
 
-    mnts=$(grep -E '^MOUNTPOINT.*' $CONF_FILE | sort -k 5)
+    mnts=$(grep -E '^MOUNTPOINT .*' $CONF_FILE | sort -k 5)
     set -- ${mnts}
     while [ $# -ne 0 ]; do
         dev=$2; fstype=$3; mntpt="$5"; mkfs=$6
@@ -1134,7 +1137,7 @@ failed to mount $dev on ${mntpt}! check $LOG for errors." ${MSGBOXSIZE}
     done
 
     # mount all filesystems in target rootfs
-    mnts=$(grep -E '^MOUNTPOINT.*' $CONF_FILE | sort -k 5)
+    mnts=$(grep -E '^MOUNTPOINT .*' $CONF_FILE | sort -k 5)
     set -- ${mnts}
     while [ $# -ne 0 ]; do
         dev=$2; fstype=$3; mntpt="$5"
@@ -1168,7 +1171,7 @@ mount_filesystems() {
 }
 
 umount_filesystems() {
-    local mnts="$(grep -E '^MOUNTPOINT.*swap.*$' $CONF_FILE | sort -r -k 5)"
+    local mnts="$(grep -E '^MOUNTPOINT .* swap .*$' $CONF_FILE | sort -r -k 5)"
     set -- ${mnts}
     while [ $# -ne 0 ]; do
         local dev=$2; local fstype=$3
@@ -1219,14 +1222,16 @@ copy_rootfs() {
 install_packages() {
     local _grub= _syspkg=
 
-    if [ -n "$EFI_SYSTEM" ]; then
-        if [ $EFI_FW_BITS -eq 32 ]; then
-            _grub="grub-i386-efi"
+    if [ "$(get_option BOOTLOADER)" != none ]; then
+        if [ -n "$EFI_SYSTEM" ]; then
+            if [ $EFI_FW_BITS -eq 32 ]; then
+                _grub="grub-i386-efi"
+            else
+                _grub="grub-x86_64-efi"
+            fi
         else
-            _grub="grub-x86_64-efi"
+            _grub="grub"
         fi
-    else
-        _grub="grub"
     fi
 
     _syspkg="base-system"
@@ -1250,11 +1255,51 @@ install_packages() {
         DIE 1
     fi
     xbps-reconfigure -r $TARGETDIR -f base-files >/dev/null 2>&1
-    chroot $TARGETDIR xbps-reconfigure -a
+    stdbuf -oL chroot $TARGETDIR xbps-reconfigure -a 2>&1 | \
+        DIALOG --title "Configuring base system packages..." --programbox 24 80
+    if [ $? -ne 0 ]; then
+        DIE 1
+    fi
+}
+
+menu_services() {
+    local sv _status _checklist=""
+    # filter out services that probably shouldn't be messed with
+    local sv_ignore='^(agetty-(tty[1-9]|generic|serial|console)|udevd|sulogin)$'
+    find $TARGETDIR/etc/runit/runsvdir/default -mindepth 1 -maxdepth 1 -xtype d -printf '%f\n' | \
+        grep -Ev "$sv_ignore" | sort -u > "$TARGET_SERVICES"
+    while true; do
+        while read -r sv; do
+            if [ -n "$sv" ]; then
+                if grep -qx "$sv" "$TARGET_SERVICES" 2>/dev/null; then
+                    _status=on
+                else
+                    _status=off
+                fi
+                _checklist+=" ${sv} ${sv} ${_status}"
+            fi
+        done < <(find $TARGETDIR/etc/sv -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | grep -Ev "$sv_ignore" | sort -u)
+        DIALOG --no-tags --checklist "Select services to enable:" 20 60 18 ${_checklist}
+        if [ $? -eq 0 ]; then
+            comm -13 "$TARGET_SERVICES" <(cat "$ANSWER" | tr ' ' '\n') | while read -r sv; do
+                enable_service "$sv"
+            done
+            comm -23 "$TARGET_SERVICES" <(cat "$ANSWER" | tr ' ' '\n') | while read -r sv; do
+                disable_service "$sv"
+            done
+            break
+        else
+            return
+        fi
+    done
 }
 
 enable_service() {
-    ln -sf /etc/sv/$1 $TARGETDIR/etc/runit/runsvdir/default/$1
+    ln -sf "/etc/sv/$1" "$TARGETDIR/etc/runit/runsvdir/default/$1"
+}
+
+disable_service() {
+    rm -f "$TARGETDIR/etc/runit/runsvdir/default/$1"
 }
 
 menu_install() {
@@ -1332,7 +1377,13 @@ ${BOLD}Do you want to continue?${RESET}" 20 80 || return
         if ! [ -e "/var/service/brltty" ]; then
             TO_REMOVE+=" brltty"
         fi
-        xbps-remove -r $TARGETDIR -Ry $TO_REMOVE >>$LOG 2>&1
+        if [ "$(get_option BOOTLOADER)" = none ]; then
+            TO_REMOVE+=" grub-x86_64-efi grub-i386-efi grub"
+        fi
+        # uninstall separately to minimise errors
+        for pkg in $TO_REMOVE; do
+            xbps-remove -r $TARGETDIR -Ry "$pkg" >>$LOG 2>&1
+        done
         rmdir $TARGETDIR/mnt/target
     else
         # mount required fs
@@ -1372,7 +1423,7 @@ ${BOLD}Do you want to continue?${RESET}" 20 80 || return
         elif [ "$_type" = "dhcp" ]; then
             if $(echo $_dev|egrep -q "^wl.*" 2>/dev/null); then
                 cp /etc/wpa_supplicant/wpa_supplicant.conf $TARGETDIR/etc/wpa_supplicant
-                ln -sf /etc/sv/wpa_supplicant $TARGETDIR/etc/runit/runsvdir/default/wpa_supplicant
+                enable_service wpa_supplicant
             fi
             enable_service dhcpcd
         elif [ -n "$_dev" -a "$_type" = "static" ]; then
@@ -1413,6 +1464,10 @@ ${BOLD}Do you want to continue?${RESET}" 20 80 || return
 
     # install bootloader.
     set_bootloader
+
+    # menu for enabling services
+    menu_services
+
     sync && sync && sync
 
     # unmount all filesystems.
@@ -1502,8 +1557,8 @@ menu() {
     if [ $? -eq 3 ]; then
         # Show settings
         cp $CONF_FILE /tmp/conf_hidden.$$;
-        sed -i "s/^ROOTPASSWORD.*/ROOTPASSWORD <-hidden->/" /tmp/conf_hidden.$$
-        sed -i "s/^USERPASSWORD.*/USERPASSWORD <-hidden->/" /tmp/conf_hidden.$$
+        sed -i "s/^ROOTPASSWORD .*/ROOTPASSWORD <-hidden->/" /tmp/conf_hidden.$$
+        sed -i "s/^USERPASSWORD .*/USERPASSWORD <-hidden->/" /tmp/conf_hidden.$$
         DIALOG --title "Saved settings for installation" --textbox /tmp/conf_hidden.$$ 14 60
         rm /tmp/conf_hidden.$$
         return

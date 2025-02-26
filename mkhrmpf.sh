@@ -1,4 +1,21 @@
-#!/bin/sh
+#!/bin/bash
+
+while getopts a: FLAG; do
+	case "$FLAG" in
+		a) ARCH="$OPTARG" ;;
+		*) exit 1 ;;
+	esac
+done
+
+shift $((OPTIND - 1))
+
+if [ -z "$ARCH" ]; then
+    if command -v xbps-uhelper >/dev/null 2>&1; then
+        ARCH="$(xbps-uhelper arch)"
+    else
+        ARCH="$(uname -m)"
+    fi
+fi
 
 rm -rf hrmpf-include
 
@@ -16,28 +33,72 @@ mkdir -p hrmpf-include/var/log/socklog/tty12
 printf '%s\n' '-*' 'e*' 'Eauth.*' 'Eauthpriv.*' > hrmpf-include/var/log/socklog/tty12/config
 mkdir -p hrmpf-include/etc/skel hrmpf-include/root
 touch hrmpf-include/etc/skel/.vimrc hrmpf-include/root/.vimrc
+cat << 'EOF' >> hrmpf-include/etc/skel/.bash_profile
+[ -f $HOME/.bashrc ] && . $HOME/.bashrc
+EOF
+cp hrmpf-include/etc/skel/.bash_profile hrmpf-include/root/.bash_profile
+cat << 'EOF' >> hrmpf-include/etc/skel/.bashrc
+[[ $- != *i* ]] && return
+PROMPT_COMMAND='history -a'
+PROMPT_DIRTRIM=2
+PS1='[\u@\h \w]\$ '
+EOF
+cp hrmpf-include/etc/skel/.bashrc hrmpf-include/root/.bashrc
 mkdir -p hrmpf-include/etc/sysctl.d
 touch hrmpf-include/etc/sysctl.d/10-void-user.conf
 
-mkdir -p hrmpf-include/usr/bin
-sed "s/@@MKLIVE_VERSION@@/$(date -u +%Y%m%d)/g" < installer.sh > hrmpf-include/usr/bin/void-installer
-chmod 0755 hrmpf-include/usr/bin/void-installer
+case "$ARCH" in
+	x86_64*)
+		mkdir -p hrmpf-include/usr/bin
+		sed "s/@@MKLIVE_VERSION@@/$(date -u +%Y%m%d)/g" < installer.sh > hrmpf-include/usr/bin/void-installer
+		chmod 0755 hrmpf-include/usr/bin/void-installer
+
+		extra_args=(
+			-s "xz -Xbcj x86"
+			-B extra/balder10.img
+			-B extra/mhdd32ver4.6.iso
+			-B extra/ipxe.iso
+			-B extra/memtest86+-5.01.iso
+			-B extra/grub2.iso
+		)
+		;;
+	aarch64*)
+		mkdir -p hrmpf-include/usr/bin
+		printf "#!/bin/sh\necho 'void-installer is not supported on this live image'\n" > hrmpf-include/usr/bin/void-installer
+		chmod 0755 hrmpf-include/usr/bin/void-installer
+		extra_args=(
+			-s "xz -Xbcj arm"
+		)
+		;;
+esac
+
+case "$ARCH" in
+	aarch64*)
+		extra_args+=(
+			-r https://repo-default.voidlinux.org/current/aarch64/nonfree
+		)
+		;;
+	*-musl)
+		extra_args+=(
+			-r https://repo-default.voidlinux.org/current/musl/nonfree
+		)
+		;;
+	*)
+		extra_args+=(
+			-r https://repo-default.voidlinux.org/current/nonfree
+		)
+		;;
+esac
 
 ./mklive.sh \
 	-T "hrmpf live/rescue system" \
 	-C "loglevel=6 printk.time=1 consoleblank=0 net.ifnames=0" \
-	-r https://repo-default.voidlinux.org/current \
-	-r https://repo-default.voidlinux.org/current/nonfree \
 	-F 2048 \
 	-i zstd \
-	-s "xz -Xbcj x86" \
-	-B extra/balder10.img \
-	-B extra/mhdd32ver4.6.iso \
-	-B extra/ipxe.iso \
-	-B extra/memtest86+-5.01.iso \
-	-B extra/grub2.iso \
-	-p "$(grep '^[^#].' hrmpf.packages)" \
+	-p "$(grep -hs '^[^#].' hrmpf.packages "hrmpf.${ARCH%-musl}.packages")" \
 	-A "gawk tnftp inetutils-hostname libressl-netcat dash vim-common" \
 	-S "acpid binfmt-support dhcpcd gpm sshd" \
 	-I hrmpf-include \
+	"${extra_args[@]}" \
+	${ARCH:+-a $ARCH} \
 	"$@"

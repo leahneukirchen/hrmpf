@@ -1,7 +1,5 @@
 #!/bin/bash
 #
-# vim: set ts=4 sw=4 et:
-#
 #-
 # Copyright (c) 2009-2015 Juan Romero Pardines.
 # All rights reserved.
@@ -26,74 +24,91 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #-
-trap 'error_out $? $LINENO' INT TERM 0
 umask 022
 
 . ./lib.sh
 
-readonly REQUIRED_PKGS="base-files libgcc dash coreutils sed tar gawk syslinux grub-i386-efi grub-x86_64-efi memtest86+ squashfs-tools xorriso"
-readonly INITRAMFS_PKGS="binutils xz device-mapper dhclient dracut-network openresolv"
-readonly PROGNAME=$(basename "$0")
+REQUIRED_PKGS=(base-files libgcc dash coreutils sed tar gawk squashfs-tools xorriso)
+TARGET_PKGS=(base-files)
+INITRAMFS_PKGS=(binutils xz device-mapper dhclient dracut-network openresolv)
+PACKAGE_LIST=()
+IGNORE_PKGS=()
+PLATFORMS=()
+readonly PROGNAME="$(basename "$0")"
 declare -a INCLUDE_DIRS=()
 
-info_msg() {
-    printf "\033[1m$@\n\033[m"
-}
 die() {
-    info_msg "ERROR: $@"
+    info_msg "ERROR: $*"
     error_out 1 $LINENO
 }
+
 print_step() {
     CURRENT_STEP=$((CURRENT_STEP+1))
-    info_msg "[${CURRENT_STEP}/${STEP_COUNT}] $@"
+    info_msg "[${CURRENT_STEP}/${STEP_COUNT}] $*"
 }
+
 mount_pseudofs() {
     for f in sys dev proc; do
         mkdir -p "$ROOTFS"/$f
         mount --rbind /$f "$ROOTFS"/$f
     done
 }
+
 umount_pseudofs() {
-    umount -R -f "$ROOTFS"/sys >/dev/null 2>&1
-    umount -R -f "$ROOTFS"/dev >/dev/null 2>&1
-    umount -R -f "$ROOTFS"/proc >/dev/null 2>&1
+	for f in sys dev proc; do
+		if [ -d "$ROOTFS/$f" ] && ! umount -R -f "$ROOTFS/$f"; then
+			info_msg "ERROR: failed to unmount $ROOTFS/$f/"
+			return 1
+		fi
+	done
 }
+
 error_out() {
-    umount_pseudofs
-    [ -d "$BUILDDIR" -a -z "$KEEP_BUILDDIR" ] && rm -rf "$BUILDDIR"
-    exit "${1:=0}"
+	trap - INT TERM 0
+    umount_pseudofs || exit "${1:-0}"
+    [ -d "$BUILDDIR" ] && [ -z "$KEEP_BUILDDIR" ] && rm -rf --one-file-system "$BUILDDIR"
+    exit "${1:-0}"
 }
 
 usage() {
-    cat <<_EOF
-Usage: $PROGNAME [options]
+	cat <<-EOH
+	Usage: $PROGNAME [options]
 
-Options:
- -a <xbps-arch>     Set XBPS_ARCH (do not use it unless you know what it is)
- -A "pkg pkgN"      Set xbps-alternatives for packages.
- -b <system-pkg>    Set an alternative base-system package (defaults to base-system).
- -r <repo-url>      Use this XBPS repository (may be specified multiple times).
- -c <cachedir>      Use this XBPS cache directory (a subdirectory of current 
-directory if unset).
- -k <keymap>        Default keymap to use (us if unset)
- -l <locale>        Default locale to use (en_US.UTF-8 if unset).
- -i <lz4|gzip|bzip2|xz> Compression type for the initramfs image (xz if unset).
- -s <gzip|lzo|xz>     Compression type for the squashfs image (xz if unset)
- -o <file>          Output file name for the ISO image (auto if unset).
- -p "pkg pkgN ..."  Install additional packages into the ISO image.
- -I <includedir>    Include directory structure under given path into rootfs
- -S "service serviceN ..." Services to enable
- -C "cmdline args"  Add additional kernel command line arguments.
- -T "title"         Modify the bootloader title.
- -v linux<version>  Install a custom Linux version on ISO image (linux meta-package if unset).
- -K                 Do not remove builddir.
- -B <file>          Add file to /boot
- -F <freesize>      Allocate this free size (MB) for the rootfs.
+	Generates a basic live ISO image of Void Linux. This ISO image can be written
+	to a CD/DVD-ROM or any USB stick.
 
-The $PROGNAME script generates a live image of the Void Linux distribution.
-This ISO image can be written to a CD/DVD-ROM or any USB stick.
-_EOF
-    exit 1
+	To generate a more complete live ISO image, use mkiso.sh.
+
+	OPTIONS
+	 -a <arch>          Set XBPS_ARCH in the ISO image
+	 -A "pkg pkgN"      Set xbps-alternatives for packages.
+	 -b <system-pkg>    Set an alternative base package (default: base-system)
+	 -r <repo>          Use this XBPS repository. May be specified multiple times
+	 -c <cachedir>      Use this XBPS cache directory (default: ./xbps-cachedir-<arch>)
+	 -k <keymap>        Default keymap to use (default: us)
+	 -l <locale>        Default locale to use (default: en_US.UTF-8)
+	 -i <lz4|gzip|bzip2|xz>
+	                    Compression type for the initramfs image (default: xz)
+	 -s <gzip|lzo|xz>   Compression type for the squashfs image (default: xz)
+	 -o <file>          Output file name for the ISO image (default: automatic)
+	 -p "<pkg> ..."     Install additional packages in the ISO image
+	 -g "<pkg> ..."     Ignore packages when building the ISO image
+	 -I <includedir>    Include directory structure under given path in the ROOTFS
+	 -S "<service> ..." Enable services in the ISO image
+	 -e <shell>         Default shell of the root user (must be absolute path).
+	                    Set the live.shell kernel argument to change the default shell of anon.
+	 -C "<arg> ..."     Add additional kernel command line arguments
+	 -P "<platform> ..."
+	                    Platforms to enable for aarch64 EFI ISO images (available: pinebookpro, x13s)
+	 -T <title>         Modify the bootloader title (default: Void Linux)
+	 -v linux<version>  Install a custom Linux version on ISO image (default: linux metapackage).
+	                    Also accepts linux metapackages (linux-mainline, linux-lts).
+	 -K                 Do not remove builddir
+	 -B <file>          Add file to /boot
+	 -F <freesize>      Allocate this free size (MB) for the rootfs.
+	 -h                 Show this help and exit
+	 -V                 Show version and exit
+	EOH
 }
 
 copy_void_keys() {
@@ -112,21 +127,44 @@ copy_autoinstaller_files() {
 }
 
 install_prereqs() {
-    XBPS_ARCH=$ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} \
-         -c "$XBPS_HOST_CACHEDIR" -y $REQUIRED_PKGS
+    XBPS_ARCH=$HOST_ARCH "$XBPS_INSTALL_CMD" -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} \
+         -c "$XBPS_HOST_CACHEDIR" -y "${REQUIRED_PKGS[@]}"
     [ $? -ne 0 ] && die "Failed to install required software, exiting..."
 }
 
+install_target_pkgs() {
+    XBPS_ARCH=$TARGET_ARCH "$XBPS_INSTALL_CMD" -r "$VOIDTARGETDIR" ${XBPS_REPOSITORY} \
+         -c "$XBPS_HOST_CACHEDIR" -y "${TARGET_PKGS[@]}"
+    [ $? -ne 0 ] && die "Failed to install required software, exiting..."
+}
+
+post_install_packages() {
+    xbps-query -r $ROOTFS -l >installed.pkgs
+    for a in $ALTERNATIVES; do
+        xbps-alternatives -r $ROOTFS -s $a
+    done
+    xbps-alternatives -r $ROOTFS -l >installed.alternatives
+
+    # Cleanup and remove useless stuff.
+    rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
+
+    # boot failure if disks have raid logical volumes and this isn't loaded
+    for f in "$ROOTFS/usr/lib/modules/$KERNELVERSION/kernel/drivers/md/dm-raid.ko".*; do
+        echo "dm-raid" > "$ROOTFS"/etc/modules-load.d/dm-raid.conf
+        break
+    done
+}
+
 install_packages() {
-    XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" \
-        ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn $PACKAGE_LIST $INITRAMFS_PKGS
+    XBPS_ARCH=$TARGET_ARCH "${XBPS_INSTALL_CMD}" -r "$ROOTFS" \
+        ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -yn "${PACKAGE_LIST[@]}" "${INITRAMFS_PKGS[@]}"
     [ $? -ne 0 ] && die "Missing required binary packages, exiting..."
 
     mount_pseudofs
 
-    LANG=C XBPS_ARCH=$BASE_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" \
-        ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y $PACKAGE_LIST $INITRAMFS_PKGS
-    [ $? -ne 0 ] && die "Failed to install $PACKAGE_LIST"
+    LANG=C XBPS_TARGET_ARCH=$TARGET_ARCH "${XBPS_INSTALL_CMD}" -U -r "$ROOTFS" \
+        ${XBPS_REPOSITORY} -c "$XBPS_CACHEDIR" -y "${PACKAGE_LIST[@]}" "${INITRAMFS_PKGS[@]}"
+    [ $? -ne 0 ] && die "Failed to install ${PACKAGE_LIST[*]} ${INITRAMFS_PKGS[*]}"
 
     xbps-reconfigure -r "$ROOTFS" -f base-files >/dev/null 2>&1
     chroot "$ROOTFS" env -i xbps-reconfigure -f base-files
@@ -135,17 +173,29 @@ install_packages() {
     if [ -f "$ROOTFS"/etc/default/libc-locales ]; then
         sed -e "s/\#\(${LOCALE}.*\)/\1/g" -i "$ROOTFS"/etc/default/libc-locales
     fi
+
+    if XBPS_ARCH=$BASE_ARCH "$XBPS_QUERY_CMD" -r "$ROOTFS" dkms >/dev/null 2>&1; then
+        # dkms modules alphabetically before dkms can't configure
+        # if dkms hasn't configured beforehand to create /var/lib/dkms
+        chroot "$ROOTFS" env -i xbps-reconfigure dkms
+    fi
+
     chroot "$ROOTFS" env -i xbps-reconfigure -a
 
-    xbps-query -r $ROOTFS -l >installed.pkgs
-    for a in $ALTERNATIVES; do
-        xbps-alternatives -r $ROOTFS -s $a
-    done
-    xbps-alternatives -r $ROOTFS -l >installed.alternatives
+    if XBPS_ARCH=$BASE_ARCH "$XBPS_QUERY_CMD" -r "$ROOTFS" dash >/dev/null 2>&1; then
+        # bash configures alphabetically before dash,
+        # so if it's installed we should ensure it's /bin/sh
+        chroot "$ROOTFS" env -i xbps-alternatives -s dash
+    fi
 
+    post_install_packages
+}
 
-    # Cleanup and remove useless stuff.
-    rm -rf "$ROOTFS"/var/cache/* "$ROOTFS"/run/* "$ROOTFS"/var/run/*
+ignore_packages() {
+	mkdir -p "$ROOTFS"/etc/xbps.d
+	for pkg in "${IGNORE_PKGS[@]}"; do
+		echo "ignorepkg=$pkg" >> "$ROOTFS"/etc/xbps.d/mklive-ignore.conf
+	done
 }
 
 enable_services() {
@@ -156,6 +206,11 @@ enable_services() {
         fi
         ln -sf /etc/sv/$service $ROOTFS/etc/runit/runsvdir/default/
     done
+}
+
+change_shell() {
+    chroot "$ROOTFS" chsh -s "$ROOT_SHELL" root
+    [ $? -ne 0 ] && die "Failed to change the shell for root"
 }
 
 copy_include_directories() {
@@ -170,23 +225,42 @@ generate_initramfs() {
 
     copy_dracut_files "$ROOTFS"
     copy_autoinstaller_files "$ROOTFS"
-    chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
-        --add-drivers "ahci" --force-add "vmklive livenet autoinstaller" --omit systemd "/boot/initrd-lts" $LTSKERNELVERSION
+    if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
+        chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
+            --add-drivers "ahci" --force-add "vmklive livenet autoinstaller" --omit systemd "/boot/initrd-lts" $LTSKERNELVERSION
+        [ $? -ne 0 ] && die "Failed to generate the initramfs"
+    fi
     chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
         --add-drivers "ahci" --force-add "vmklive livenet autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION
     [ $? -ne 0 ] && die "Failed to generate the initramfs"
 
-    mv "$ROOTFS"/boot/initrd-lts "$BOOT_DIR"
+    if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
+        mv "$ROOTFS"/boot/initrd-lts "$BOOT_DIR"
+    fi
     mv "$ROOTFS"/boot/initrd "$BOOT_DIR"
-    cp "$ROOTFS"/boot/vmlinuz-$LTSKERNELVERSION "$BOOT_DIR"/vmlinuz-lts
-    cp "$ROOTFS"/boot/vmlinuz-$KERNELVERSION "$BOOT_DIR"/vmlinuz
+
+	case "$TARGET_ARCH" in
+		i686*|x86_64*)
+            if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
+                cp "$ROOTFS/boot/vmlinuz-$LTSKERNELVERSION" "$BOOT_DIR"/vmlinuz-lts
+            fi
+            cp "$ROOTFS/boot/vmlinuz-$KERNELVERSION" "$BOOT_DIR"/vmlinuz
+            ;;
+		aarch64*)
+            if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
+                cp "$ROOTFS/boot/vmlinux-$LTSKERNELVERSION" "$BOOT_DIR"/vmlinux-lts
+            fi
+            cp "$ROOTFS/boot/vmlinux-$KERNELVERSION" "$BOOT_DIR"/vmlinux
+            ;;
+	esac
+
     if [ "$BOOT_FILES" ]; then
         cp $BOOT_FILES $BOOT_DIR
     fi
 }
 
 cleanup_rootfs() {
-    for f in ${INITRAMFS_PKGS}; do
+    for f in "${INITRAMFS_PKGS[@]}"; do
         revdeps=$(xbps-query -r "$ROOTFS" -X $f)
         if [ -n "$revdeps" ]; then
             xbps-pkgdb -r "$ROOTFS" -m auto $f
@@ -217,28 +291,144 @@ generate_isolinux_boot() {
         -e "s|@@KERNVER@@|${KERNELVERSION}|" \
         -e "s|@@LTSKVER@@|${LTSKERNELVERSION}|" \
         -e "s|@@KEYMAP@@|${KEYMAP}|" \
-        -e "s|@@ARCH@@|$BASE_ARCH|" \
+        -e "s|@@ARCH@@|$TARGET_ARCH|" \
         -e "s|@@LOCALE@@|${LOCALE}|" \
         -e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
         -e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
         "$ISOLINUX_DIR"/isolinux.cfg
 
     # include memtest86+
-    cp -f "$VOIDHOSTDIR"/boot/memtest86+/memtest.bin "$BOOT_DIR"
+    if [ -e "$VOIDTARGETDIR"/boot/memtest86+/memtest.bin ]; then
+        cp "$VOIDTARGETDIR"/boot/memtest86+/memtest.bin "$BOOT_DIR"
+    fi
 }
 
 generate_grub_efi_boot() {
     cp -f grub/grub.cfg "$GRUB_DIR"
-    cp -f grub/grub_void.cfg.in "$GRUB_DIR"/grub_void.cfg
-    sed -i  -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE}")|" \
-        -e "s|@@KERNVER@@|${KERNELVERSION}|" \
-        -e "s|@@LTSKVER@@|${LTSKERNELVERSION}|" \
-        -e "s|@@KEYMAP@@|${KEYMAP}|" \
-        -e "s|@@ARCH@@|$BASE_ARCH|" \
-        -e "s|@@BOOT_TITLE@@|${BOOT_TITLE}|" \
-        -e "s|@@BOOT_CMDLINE@@|${BOOT_CMDLINE}|" \
-        -e "s|@@LOCALE@@|${LOCALE}|" "$GRUB_DIR"/grub_void.cfg
+    cp -f "${SPLASH_IMAGE}" "$ISOLINUX_DIR"
+    cp -f grub/grub_void.cfg.pre "$GRUB_DIR"/grub_void.cfg
+
+    case "$TARGET_ARCH" in
+        i686*|x86_64*) KERNEL_IMG=vmlinuz; WANT_MEMTEST=yes ;;
+        aarch64*) KERNEL_IMG=vmlinux; WANT_MEMTEST=no ;;
+    esac
+
+    write_entry() {
+        local entrytitle="$1" id="$2" cmdline="$3" dtb="$4" hotkey="$5"
+        cat << EOF >> "$GRUB_DIR"/grub_void.cfg
+menuentry "${entrytitle}" --id "${id}" ${hotkey:+--hotkey $hotkey} {
+    set gfxpayload="keep"
+    linux (\${voidlive})/boot/${KERNEL_IMG} \\
+        root=live:CDLABEL=VOID_LIVE ro init=/sbin/init \\
+        rd.luks=0 rd.md=0 rd.dm=0 loglevel=4 gpt add_efi_memmap \\
+        vconsole.unicode=1 vconsole.keymap=${KEYMAP} locale.LANG=${LOCALE} ${cmdline}
+    initrd (\${voidlive})/boot/${INITRD_IMG:-initrd}
+EOF
+        if [ -n "${dtb}" ]; then
+            printf '    devicetree (${voidlive})/boot/dtbs/%s\n' "${dtb}" >> "$GRUB_DIR"/grub_void.cfg
+        fi
+        printf '}\n' >> "$GRUB_DIR"/grub_void.cfg
+    }
+
+    write_entries() {
+        local title_sfx="$1" id_sfx="$2" cmdline="$3" dtb="$4"
+
+        ENTRY_TITLE="${BOOT_TITLE} ${KERNELVERSION} ${title_sfx}(${TARGET_ARCH})"
+
+        write_entry "${ENTRY_TITLE}" "linux${id_sfx}" \
+            "live.autologin $BOOT_CMDLINE $cmdline" "$dtb"
+        write_entry "${ENTRY_TITLE} (RAM)" "linuxram${id_sfx}" \
+            "live.autologin rd.live.ram $BOOT_CMDLINE $cmdline" "$dtb"
+        write_entry "${ENTRY_TITLE} (Serial)" "linuxserial${id_sfx}" \
+            "live.autologin rd.live.ram $BOOT_CMDLINE $cmdline console=tty0 console=ttyS0,115200n8" "$dtb"
+        write_entry "${ENTRY_TITLE} (graphics disabled)" "linuxnogfx${id_sfx}" \
+            "live.autologin nomodeset $BOOT_CMDLINE $cmdline" "$dtb"
+
+        if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
+            ENTRY_TITLE="${BOOT_TITLE} ${LTSKERNELVERSION} ${title_sfx}(${TARGET_ARCH})"
+
+            KERNEL_IMG="${KERNEL_IMG}-lts" INITRD_IMG="initrd-lts" \
+                write_entry "${ENTRY_TITLE} LTS" "linuxlts${id_sfx}" \
+                "live.autologin $BOOT_CMDLINE $cmdline" "$dtb"
+            KERNEL_IMG="${KERNEL_IMG}-lts" INITRD_IMG="initrd-lts" \
+                write_entry "${ENTRY_TITLE} LTS (RAM)" "linuxltsram${id_sfx}" \
+                "live.autologin rd.live.ram $BOOT_CMDLINE $cmdline" "$dtb"
+            KERNEL_IMG="${KERNEL_IMG}-lts" INITRD_IMG="initrd-lts" \
+                write_entry "${ENTRY_TITLE} LTS (Serial)" "linuxltsserial${id_sfx}" \
+                "live.autologin rd.live.ram $BOOT_CMDLINE $cmdline console=tty0 console=ttyS0,115200n8" "$dtb"
+            KERNEL_IMG="${KERNEL_IMG}-lts" INITRD_IMG="initrd-lts" \
+                write_entry "${ENTRY_TITLE} LTS (graphics disabled)" "linuxltsnogfx${id_sfx}" \
+                "live.autologin nomodeset $BOOT_CMDLINE $cmdline" "$dtb"
+        fi
+
+        ENTRY_TITLE="${BOOT_TITLE} ${KERNELVERSION} ${title_sfx}(${TARGET_ARCH})"
+
+        write_entry "${ENTRY_TITLE} with speech" "linuxa11y${id_sfx}" \
+            "live.accessibility live.autologin $BOOT_CMDLINE $cmdline" "$dtb" 's'
+        write_entry "${ENTRY_TITLE} with speech (RAM)" "linuxa11yram${id_sfx}" \
+            "live.accessibility live.autologin rd.live.ram $BOOT_CMDLINE $cmdline" "$dtb" 'r'
+        write_entry "${ENTRY_TITLE} with speech (graphics disabled)" "linuxa11ynogfx${id_sfx}" \
+            "live.accessibility live.autologin nomodeset $BOOT_CMDLINE $cmdline" "$dtb" 'g'
+
+    }
+
+    write_entries
+
+    for platform in "${PLATFORMS[@]}"; do
+        (
+            . "platforms/${platform}.sh"
+
+            if [ -n "$PLATFORM_DTB" ]; then
+                mkdir -p "${BOOT_DIR}/dtbs/${PLATFORM_DTB%/*}"
+                cp "${ROOTFS}/boot/dtbs/dtbs-${KERNVER}"*/"${PLATFORM_DTB}" "${BOOT_DIR}/dtbs/${PLATFORM_DTB}"
+            fi
+
+            printf 'submenu "%s" --id platform-%s {\n' \
+                "${BOOT_TITLE} for ${PLATFORM_NAME:-$platform} >" "${platform}" >> "$GRUB_DIR"/grub_void.cfg
+            write_entries "for ${PLATFORM_NAME:-$platform} " "-$platform" "$PLATFORM_CMDLINE" "${PLATFORM_DTB}"
+            printf '}\n' >> "$GRUB_DIR"/grub_void.cfg
+        )
+    done
+
+    if [ "$WANT_MEMTEST" = yes ]; then
+        cat << 'EOF' >> "$GRUB_DIR"/grub_void.cfg
+    if [ "${grub_platform}" == "efi" ]; then
+        menuentry "Run Memtest86+ (RAM test)" --id memtest {
+            set gfxpayload="keep"
+            linux (${voidlive})/boot/memtest.efi
+        }
+    else
+        menuentry "Run Memtest86+ (RAM test)" --id memtest {
+            set gfxpayload="keep"
+            linux (${voidlive})/boot/memtest.bin
+        }
+    fi
+EOF
+    fi
+
+    cat << 'EOF' >> "$GRUB_DIR"/grub_void.cfg
+if [ "${grub_platform}" == "efi" ]; then
+    menuentry 'UEFI Firmware Settings' --hotkey f --id uefifw {
+        fwsetup
+    }
+fi
+
+menuentry "System restart" --hotkey b --id restart {
+    echo "System rebooting..."
+    reboot
+}
+
+menuentry "System shutdown" --hotkey p --id poweroff {
+    echo "System shutting down..."
+    halt
+}
+EOF
+    cat grub/grub_void.cfg.post >> "$GRUB_DIR"/grub_void.cfg
+
+    sed -i -e "s|@@SPLASHIMAGE@@|$(basename "${SPLASH_IMAGE}")|" "$GRUB_DIR"/grub_void.cfg
+
     mkdir -p "$GRUB_DIR"/fonts
+
     cp -f "$GRUB_DATADIR"/unicode.pf2 "$GRUB_DIR"/fonts
 
     modprobe -q loop || :
@@ -247,34 +437,42 @@ generate_grub_efi_boot() {
     truncate -s 128M "$GRUB_DIR"/efiboot.img >/dev/null 2>&1
     mkfs.vfat -F12 -S 512 -n "grub_uefi" "$GRUB_DIR/efiboot.img" >/dev/null 2>&1
 
-    GRUB_EFI_TMPDIR="$(mktemp --tmpdir="$HOME" -d)"
+    GRUB_EFI_TMPDIR="$(mktemp --tmpdir="$BUILDDIR" -dt grub-efi.XXXXX)"
     LOOP_DEVICE="$(losetup --show --find "${GRUB_DIR}"/efiboot.img)"
     mount -o rw,flush -t vfat "${LOOP_DEVICE}" "${GRUB_EFI_TMPDIR}" >/dev/null 2>&1
 
-    cp -a "$IMAGEDIR"/boot "$VOIDHOSTDIR"
-    xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
-		 --directory="/usr/lib/grub/i386-efi" \
-		 --format="i386-efi" \
-		 --output="/tmp/bootia32.efi" \
-		 "boot/grub/grub.cfg"
-    if [ $? -ne 0 ]; then
-        umount "$GRUB_EFI_TMPDIR"
-        losetup --detach "${LOOP_DEVICE}"
-        die "Failed to generate EFI loader"
-    fi
-    mkdir -p "${GRUB_EFI_TMPDIR}"/EFI/BOOT
-    cp -f "$VOIDHOSTDIR"/tmp/bootia32.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTIA32.EFI
-    xbps-uchroot "$VOIDHOSTDIR" grub-mkstandalone -- \
-		 --directory="/usr/lib/grub/x86_64-efi" \
-		 --format="x86_64-efi" \
-		 --output="/tmp/bootx64.efi" \
-		 "boot/grub/grub.cfg"
-    if [ $? -ne 0 ]; then
-        umount "$GRUB_EFI_TMPDIR"
-        losetup --detach "${LOOP_DEVICE}"
-        die "Failed to generate EFI loader"
-    fi
-    cp -f "$VOIDHOSTDIR"/tmp/bootx64.efi "${GRUB_EFI_TMPDIR}"/EFI/BOOT/BOOTX64.EFI
+	build_grub_image() {
+		local GRUB_ARCH="$1" EFI_ARCH="$2"
+		xbps-uchroot "$VOIDTARGETDIR" grub-mkstandalone -- \
+			 --directory="/usr/lib/grub/${GRUB_ARCH}-efi" \
+			 --format="${GRUB_ARCH}-efi" \
+			 --output="/tmp/boot${EFI_ARCH,,}.efi" \
+			 "boot/grub/grub.cfg"
+		if [ $? -ne 0 ]; then
+			umount "$GRUB_EFI_TMPDIR"
+			losetup --detach "${LOOP_DEVICE}"
+			die "Failed to generate EFI loader"
+		fi
+		mkdir -p "${GRUB_EFI_TMPDIR}"/EFI/BOOT
+		cp -f "$VOIDTARGETDIR/tmp/boot${EFI_ARCH,,}.efi" "${GRUB_EFI_TMPDIR}/EFI/BOOT/BOOT${EFI_ARCH^^}.EFI"
+	}
+
+    cp -a "$IMAGEDIR"/boot "$VOIDTARGETDIR"
+
+    case "$TARGET_ARCH" in
+		i686*|x86_64*)
+			# XXX: why are both built on both arches?
+			build_grub_image i386 ia32
+			build_grub_image x86_64 x64
+			# include memtest86+
+			if [ -e "$VOIDTARGETDIR"/boot/memtest86+/memtest.efi ]; then
+				cp "$VOIDTARGETDIR"/boot/memtest86+/memtest.efi "$BOOT_DIR"
+			fi
+			;;
+		aarch64*)
+			build_grub_image arm64 aa64
+            ;;
+    esac
     umount "$GRUB_EFI_TMPDIR"
     losetup --detach "${LOOP_DEVICE}"
     rm -rf "$GRUB_EFI_TMPDIR"
@@ -284,7 +482,7 @@ generate_grub_efi_boot() {
 }
 
 generate_squashfs() {
-    umount_pseudofs
+    umount_pseudofs || exit 1
 
     # Find out required size for the rootfs and create an ext3fs image off it.
     ROOTFS_SIZE=$(du --apparent-size -sm "$ROOTFS"|awk '{print $1}')
@@ -310,97 +508,160 @@ generate_squashfs() {
 }
 
 generate_iso_image() {
-    "$VOIDHOSTDIR"/usr/bin/xorriso -as mkisofs \
-        -iso-level 3 -rock -joliet \
-        -max-iso9660-filenames -omit-period \
-        -omit-version-number -relaxed-filenames -allow-lowercase \
-        -volid "VOID_LIVE" \
-        -eltorito-boot boot/isolinux/isolinux.bin \
-        -eltorito-catalog boot/isolinux/boot.cat \
-        -no-emul-boot -boot-load-size 4 -boot-info-table \
-        -eltorito-alt-boot -e boot/grub/efiboot.img -isohybrid-gpt-basdat -no-emul-boot \
-        -isohybrid-mbr "$SYSLINUX_DATADIR"/isohdpfx.bin \
-        -output "$OUTPUT_FILE" "$IMAGEDIR" || die "Failed to generate ISO image"
+    local bootloader n
+    XORRISO_ARGS=(
+        -iso-level 3 -rock -joliet -joliet-long -max-iso9660-filenames -omit-period
+        -omit-version-number -relaxed-filenames -allow-lowercase
+        -volid VOID_LIVE
+    )
+
+    if [ "$IMAGE_TYPE" = hybrid ]; then
+        XORRISO_ARGS+=(-isohybrid-mbr "$SYSLINUX_DATADIR"/isohdpfx.bin)
+    fi
+
+    n=1
+    for bootloader in "${BOOTLOADERS[@]}"; do
+        if (( n > 1 )); then
+            XORRISO_ARGS+=(-eltorito-alt-boot)
+        fi
+
+        case "${bootloader}" in
+            grub)
+                XORRISO_ARGS+=(
+                    -e boot/grub/efiboot.img -no-emul-boot
+                    -isohybrid-gpt-basdat -isohybrid-apm-hfsplus
+                )
+                ;;
+            syslinux)
+                XORRISO_ARGS+=(
+                    -eltorito-boot boot/isolinux/isolinux.bin
+                    -eltorito-catalog boot/isolinux/boot.cat
+                    -no-emul-boot -boot-load-size 4 -boot-info-table
+                )
+                ;;
+        esac
+
+        n=$(( n + 1 ))
+    done
+
+    XORRISO_ARGS+=(
+        -output "$OUTPUT_FILE" "$IMAGEDIR"
+    )
+
+    "$VOIDHOSTDIR"/usr/bin/xorriso -as mkisofs "${XORRISO_ARGS[@]}" || die "Failed to generate ISO image"
 }
 
 #
 # main()
 #
-while getopts "a:A:b:B:r:c:C:F:T:Kk:l:i:I:s:S:o:p:v:Vh" opt; do
-    case $opt in
-        a) BASE_ARCH="$OPTARG";;
+while getopts "a:A:b:B:r:c:C:F:T:Kk:l:i:I:S:e:s:o:p:g:v:P:Vh" opt; do
+	case $opt in
+		a) TARGET_ARCH="$OPTARG";;
         A) ALTERNATIVES="$OPTARG";;
-        b) BASE_SYSTEM_PKG="$OPTARG";;
+		b) BASE_SYSTEM_PKG="$OPTARG";;
         B) BOOT_FILES="$BOOT_FILES $OPTARG";;
-        r) XBPS_REPOSITORY="--repository=$OPTARG $XBPS_REPOSITORY";;
-        c) XBPS_CACHEDIR="$OPTARG";;
+		r) XBPS_REPOSITORY="--repository=$OPTARG $XBPS_REPOSITORY";;
+		c) XBPS_CACHEDIR="$OPTARG";;
+		g) IGNORE_PKGS+=($OPTARG) ;;
         F) ROOTFS_FREESIZE="$OPTARG";;
-        K) readonly KEEP_BUILDDIR=1;;
-        k) KEYMAP="$OPTARG";;
-        l) LOCALE="$OPTARG";;
-        i) INITRAMFS_COMPRESSION="$OPTARG";;
-        I) INCLUDE_DIRS+=("$OPTARG");;
-        S) SERVICE_LIST="$SERVICE_LIST $OPTARG";;
-        s) SQUASHFS_COMPRESSION="$OPTARG";;
-        o) OUTPUT_FILE="$OPTARG";;
-        p) PACKAGE_LIST="$PACKAGE_LIST $OPTARG";;
-        C) BOOT_CMDLINE="$OPTARG";;
-        T) BOOT_TITLE="$OPTARG";;
-        v) LINUX_VERSION="$OPTARG";;
-        V) version; exit 0;;
-        *) usage;;
-    esac
+		K) readonly KEEP_BUILDDIR=1;;
+		k) KEYMAP="$OPTARG";;
+		l) LOCALE="$OPTARG";;
+		i) INITRAMFS_COMPRESSION="$OPTARG";;
+		I) INCLUDE_DIRS+=("$OPTARG");;
+		S) SERVICE_LIST="$SERVICE_LIST $OPTARG";;
+		e) ROOT_SHELL="$OPTARG";;
+		s) SQUASHFS_COMPRESSION="$OPTARG";;
+		o) OUTPUT_FILE="$OPTARG";;
+		p) PACKAGE_LIST+=($OPTARG);;
+		P) PLATFORMS+=($OPTARG) ;;
+		C) BOOT_CMDLINE="$OPTARG";;
+		T) BOOT_TITLE="$OPTARG";;
+		v) LINUX_VERSION="$OPTARG";;
+		V) version; exit 0;;
+		h) usage; exit 0;;
+		*) usage >&2; exit 1;;
+	esac
 done
 shift $((OPTIND - 1))
-XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-default.voidlinux.org/current --repository=https://repo-default.voidlinux.org/current/musl"
+XBPS_REPOSITORY="$XBPS_REPOSITORY --repository=https://repo-default.voidlinux.org/current --repository=https://repo-default.voidlinux.org/current/musl --repository=https://repo-default.voidlinux.org/current/aarch64"
 
 # Configure dracut to use overlayfs for the writable overlay.
 BOOT_CMDLINE="$BOOT_CMDLINE rd.live.overlay.overlayfs=1 "
 
-ARCH=$(xbps-uhelper arch)
+HOST_ARCH=$(xbps-uhelper arch)
 
 # Set defaults
-: ${BASE_ARCH:=$(xbps-uhelper arch 2>/dev/null || uname -m)}
-: ${XBPS_CACHEDIR:="$(pwd -P)"/xbps-cachedir-${BASE_ARCH}}
-: ${XBPS_HOST_CACHEDIR:="$(pwd -P)"/xbps-cachedir-${ARCH}}
+: ${TARGET_ARCH:=$(xbps-uhelper arch 2>/dev/null || uname -m)}
+: ${XBPS_CACHEDIR:="$(pwd -P)"/xbps-cachedir-${TARGET_ARCH}}
+: ${XBPS_HOST_CACHEDIR:="$(pwd -P)"/xbps-cachedir-${HOST_ARCH}}
 : ${KEYMAP:=us}
 : ${LOCALE:=en_US.UTF-8}
 : ${INITRAMFS_COMPRESSION:=xz}
 : ${SQUASHFS_COMPRESSION:=xz}
 : ${BASE_SYSTEM_PKG:=base-system}
 : ${BOOT_TITLE:="Void Linux"}
+: ${LINUX_VERSION:=linux}
 
-case $BASE_ARCH in
-    x86_64*|i686*) ;;
-    *) >&2 echo architecture $BASE_ARCH not supported by mklive.sh; exit 1;;
+XBPS_TARGET_ARCH="$TARGET_ARCH" register_binfmt
+
+case "$TARGET_ARCH" in
+	x86_64*|i686*)
+		BOOTLOADERS=(syslinux grub)
+		IMAGE_TYPE='hybrid'
+		TARGET_PKGS+=(syslinux grub-i386-efi grub-x86_64-efi memtest86+)
+        PLATFORMS=() # arm only
+		;;
+	aarch64*)
+		BOOTLOADERS=(grub)
+		IMAGE_TYPE='efi'
+		TARGET_PKGS+=(grub-arm64-efi)
+        for platform in "${PLATFORMS[@]}"; do
+            if [ -r "platforms/${platform}.sh" ]; then
+                . "platforms/${platform}.sh"
+            else
+                die "unknown platform: ${platform}"
+            fi
+            PACKAGE_LIST+=("${PLATFORM_PKGS[@]}")
+            unset PLATFORM_PKGS PLATFORM_CMDLINE PLATFORM_DTB
+        done
+
+		;;
+    *) >&2 echo "architecture $TARGET_ARCH not supported by mklive.sh"; exit 1;;
 esac
 
 # Required packages in the image for a working system.
-PACKAGE_LIST="$BASE_SYSTEM_PKG $PACKAGE_LIST"
+PACKAGE_LIST+=("$BASE_SYSTEM_PKG")
 
 # Check for root permissions.
 if [ "$(id -u)" -ne 0 ]; then
     die "Must be run as root, exiting..."
 fi
 
+trap 'error_out $? $LINENO' INT TERM 0
+
 if [ -n "$ROOTDIR" ]; then
-    BUILDDIR=$(mktemp --tmpdir="$ROOTDIR" -d)
+    BUILDDIR=$(mktemp --tmpdir="$ROOTDIR" -dt mklive-build.XXXXX)
 else
-    BUILDDIR=$(mktemp --tmpdir="$(pwd -P)" -d)
+    BUILDDIR=$(mktemp --tmpdir="$(pwd -P)" -dt mklive-build.XXXXX)
 fi
 BUILDDIR=$(readlink -f "$BUILDDIR")
 IMAGEDIR="$BUILDDIR/image"
 ROOTFS="$IMAGEDIR/rootfs"
 VOIDHOSTDIR="$BUILDDIR/void-host"
+VOIDTARGETDIR="$BUILDDIR/void-target"
 BOOT_DIR="$IMAGEDIR/boot"
 ISOLINUX_DIR="$BOOT_DIR/isolinux"
 GRUB_DIR="$BOOT_DIR/grub"
 CURRENT_STEP=0
 STEP_COUNT=10
+[ "${IMAGE_TYPE}" = hybrid ] && STEP_COUNT=$((STEP_COUNT+1))
 [ "${#INCLUDE_DIRS[@]}" -gt 0 ] && STEP_COUNT=$((STEP_COUNT+1))
+[ "${#IGNORE_PKGS[@]}" -gt 0 ] && STEP_COUNT=$((STEP_COUNT+1))
+[ -n "$ROOT_SHELL" ] && STEP_COUNT=$((STEP_COUNT+1))
 
-: ${SYSLINUX_DATADIR:="$VOIDHOSTDIR"/usr/lib/syslinux}
-: ${GRUB_DATADIR:="$VOIDHOSTDIR"/usr/share/grub}
+: ${SYSLINUX_DATADIR:="$VOIDTARGETDIR"/usr/lib/syslinux}
+: ${GRUB_DATADIR:="$VOIDTARGETDIR"/usr/share/grub}
 : ${SPLASH_IMAGE:=data/splash.png}
 : ${XBPS_INSTALL_CMD:=xbps-install}
 : ${XBPS_REMOVE_CMD:=xbps-remove}
@@ -409,50 +670,82 @@ STEP_COUNT=10
 : ${XBPS_UHELPER_CMD:=xbps-uhelper}
 : ${XBPS_RECONFIGURE_CMD:=xbps-reconfigure}
 
-mkdir -p "$ROOTFS" "$VOIDHOSTDIR" "$ISOLINUX_DIR" "$GRUB_DIR"
+mkdir -p "$ROOTFS" "$VOIDHOSTDIR" "$VOIDTARGETDIR" "$GRUB_DIR" "$ISOLINUX_DIR"
 
 print_step "Synchronizing XBPS repository data..."
 copy_void_keys "$ROOTFS"
+XBPS_ARCH=$TARGET_ARCH $XBPS_INSTALL_CMD -r "$ROOTFS" ${XBPS_REPOSITORY} -S
 copy_void_keys "$VOIDHOSTDIR"
-XBPS_ARCH=$BASE_ARCH $XBPS_INSTALL_CMD -r "$ROOTFS" ${XBPS_REPOSITORY} -S
-XBPS_ARCH=$ARCH $XBPS_INSTALL_CMD -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -S
+XBPS_ARCH=$HOST_ARCH $XBPS_INSTALL_CMD -r "$VOIDHOSTDIR" ${XBPS_REPOSITORY} -S
+copy_void_keys "$VOIDTARGETDIR"
+XBPS_ARCH=$TARGET_ARCH $XBPS_INSTALL_CMD -r "$VOIDTARGETDIR" ${XBPS_REPOSITORY} -S
 
 # Get linux version for ISO
 # If linux version option specified use
-if [ -n "$LINUX_VERSION" ]; then
-    if ! echo "$LINUX_VERSION" | grep "linux[0-9._]\+"; then
-        die "-v option must be in format linux<version>"
-    fi
+shopt -s extglob
+case "$LINUX_VERSION" in
+    linux+([0-9.]))
+        IGNORE_PKGS+=(linux)
+        PACKAGE_LIST+=("$LINUX_VERSION" linux-base)
+        ;;
+    linux-@(mainline|lts))
+        IGNORE_PKGS+=(linux)
+        PACKAGE_LIST+=("$LINUX_VERSION")
+        LINUX_VERSION="$(XBPS_ARCH=$TARGET_ARCH $XBPS_QUERY_CMD -r "$ROOTFS" ${XBPS_REPOSITORY:=-R} -x "$LINUX_VERSION" | grep 'linux[0-9._]\+')"
+        ;;
+    linux-asahi)
+        IGNORE_PKGS+=(linux)
+        PACKAGE_LIST+=(linux-asahi linux-base)
+        ;;
+    linux)
+        PACKAGE_LIST+=(linux)
+        LINUX_VERSION="$(XBPS_ARCH=$TARGET_ARCH $XBPS_QUERY_CMD -r "$ROOTFS" ${XBPS_REPOSITORY:=-R} -x linux | grep 'linux[0-9._]\+')"
+        ;;
+    *)
+        die "-v option must be in format linux<version> or linux-<series>"
+        ;;
+esac
+shopt -u extglob
 
-    _linux_series="$LINUX_VERSION"
-    PACKAGE_LIST="$PACKAGE_LIST $LINUX_VERSION"
-else # Otherwise find latest stable version from linux meta-package
-    _linux_series=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r "$ROOTFS" ${XBPS_REPOSITORY:=-R} -x linux | grep 'linux[0-9._]\+')
-fi
-
-_linux_series=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -x linux|grep -v linux-base |head -1)
-_kver=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -p pkgver ${_linux_series})
+_kver="$(XBPS_ARCH=$TARGET_ARCH $XBPS_QUERY_CMD -r "$ROOTFS" ${XBPS_REPOSITORY:=-R} -p pkgver $LINUX_VERSION)"
 KERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_kver})
+
+if [ "$LINUX_VERSION" = linux-asahi ]; then
+    KERNELVERSION="${KERNELVERSION%%_*}-asahi_${KERNELVERSION##*_}"
+fi
 
 if [ "$?" -ne "0" ]; then
     die "Failed to find kernel package version"
 fi
 
-: ${OUTPUT_FILE="hrmpf-${BASE_ARCH}-${KERNELVERSION}-$(date -u +%Y%m%d).iso"}
+: ${OUTPUT_FILE="hrmpf-${TARGET_ARCH}-${KERNELVERSION}-$(date -u +%Y%m%d).iso"}
 
-print_step "Installing software to generate the image: ${REQUIRED_PKGS} ..."
-install_prereqs
+print_step "Installing software to generate the image: ${REQUIRED_PKGS[*]} ..."
+install_prereqs "${REQUIRED_PKGS[@]}"
+
+print_step "Installing software to generate the image: ${TARGET_PKGS[*]} ..."
+install_target_pkgs "${TARGET_PKGS[@]}"
 
 mkdir -p "$ROOTFS"/etc
 [ -s data/motd ] && cp data/motd "$ROOTFS"/etc
 [ -s data/issue.in ] && sed "s/@@VERSION@@/hrmpf-\\\\m-\\\\r-$(date +%Y%m%d)/" data/issue.in >$ROOTFS/etc/issue
 
-print_step "Installing void pkgs into the rootfs: ${PACKAGE_LIST} ..."
+if [ "${#IGNORE_PKGS[@]}" -gt 0 ]; then
+	print_step "Ignoring packages in the rootfs: ${IGNORE_PKGS[*]} ..."
+	ignore_packages
+fi
+
+print_step "Installing void pkgs into the rootfs: ${PACKAGE_LIST[*]} ..."
 install_packages
 
 : ${DEFAULT_SERVICE_LIST:=agetty-tty1 agetty-tty2 agetty-tty3 agetty-tty4 agetty-tty5 agetty-tty6 udevd}
 print_step "Enabling services: ${SERVICE_LIST} ..."
 enable_services ${DEFAULT_SERVICE_LIST} ${SERVICE_LIST}
+
+if [ -n "$ROOT_SHELL" ]; then
+    print_step "Changing the root shell ..."
+    change_shell
+fi
 
 if [ "${#INCLUDE_DIRS[@]}" -gt 0 ];then
     print_step "Copying directory structures into the rootfs ..."
@@ -461,13 +754,15 @@ fi
 
 print_step "Generating initramfs image ($INITRAMFS_COMPRESSION)..."
 
-_lts_kver=$(XBPS_ARCH=$BASE_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -l | sed -n 's/^ii //; s/ .*//; /^linux[0-9][0-9_.-]*$/p' | sort -V | head -1)
+_lts_kver=$(XBPS_ARCH=$TARGET_ARCH $XBPS_QUERY_CMD -r $ROOTFS ${XBPS_REPOSITORY:=-R} -l | sed -n 's/^ii //; s/ .*//; /^linux[0-9][0-9_.-]*$/p' | sort -V | head -1)
 LTSKERNELVERSION=$($XBPS_UHELPER_CMD getpkgversion ${_lts_kver})
 
 generate_initramfs
 
-print_step "Generating isolinux support for PC-BIOS systems..."
-generate_isolinux_boot
+if [ "$IMAGE_TYPE" = hybrid ]; then
+    print_step "Generating isolinux support for PC-BIOS systems..."
+    generate_isolinux_boot
+fi
 
 print_step "Generating GRUB support for EFI systems..."
 generate_grub_efi_boot
