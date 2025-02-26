@@ -1,0 +1,141 @@
+name: Build void images
+
+on:
+  workflow_dispatch:
+    inputs:
+      archs:
+        description: "Archs to build for"
+        default: "x86_64 aarch64"
+        required: false
+        type: string
+      platforms:
+        description: "aarch64 platforms to include support for"
+        default: "pinebookpro x13s"
+        required: false
+        type: string
+      extra_args:
+        description: "Extra arguments"
+        default: ""
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  prepare:
+    name: Prepare Environment
+    runs-on: ubuntu-latest
+    outputs:
+      archs: ${{ steps.prep.outputs.archs }}
+
+    steps:
+      - name: Prepare Environment
+        id: prep
+        run: |
+          jsonify() {
+            sed 's/\s\+/ /g' | jq -Rrc 'split(" ")'
+          }
+
+          echo "archs=$(echo "${{ inputs.archs }}" | jsonify)" >> $GITHUB_OUTPUT
+
+  build-hrmpf:
+    name: Build Hrmpf ISOs
+    runs-on: ubuntu-latest
+    needs: prepare
+
+    strategy:
+      matrix:
+        arch: ${{ fromJson(needs.prepare.outputs.archs) }}
+
+    container:
+      image: 'ghcr.io/void-linux/void-mklive:20250116R1'
+      options: --privileged
+      volumes:
+        - /dev:/dev
+      env:
+        PATH: '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:/usr/local/bin:/tmp/bin'
+
+    steps:
+      - name: Prepare container
+        shell: sh
+        run: xbps-install -Syu xbps && xbps-install -yu
+
+      - name: Clone and checkout
+        uses: classabbyamp/treeless-checkout-action@v1
+
+      - name: Build Hrmpf ISOs
+        run: |
+          ./mkhrmpf.sh -a "${{ matrix.arch }}" -- -P "${{ inputs.platforms }}" ${{ inputs.extra_args }}
+
+      - name: Prepare artifacts for upload
+        run: |
+          mkdir -p distdir
+          mv hrmpf*.iso distdir
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: hrmpf-${{ matrix.arch }}
+          path: |
+            distdir/*
+          if-no-files-found: error
+
+  merge-artifacts:
+    name: Combine artifacts
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+      - build-hrmpf
+
+    container:
+      image: 'ghcr.io/void-linux/void-mklive:20250116R1'
+      env:
+        PATH: '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:/usr/local/bin:/tmp/bin'
+
+    steps:
+      - name: Prepare container
+        shell: sh
+        run: xbps-install -Syu xbps && xbps-install -yu
+
+      - name: Clone and checkout
+        uses: classabbyamp/treeless-checkout-action@v1
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: distdir
+          merge-multiple: true
+
+      - name: Prepare artifacts for upload
+        run: |
+          cd distdir && sha256 * > sha256sum.txt
+
+      - name: Upload artifacts
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: hrmpf
+          path: |
+            distdir/*
+          if-no-files-found: error
+
+      - name: Generate summary
+        run: |
+          cat << EOF >> "$GITHUB_STEP_SUMMARY"
+          ## Images generated successfully!
+
+          ### Download
+
+          Download the result of this run from [this url](${{ steps.upload.outputs.artifact-url }}).
+
+          ### Checksums
+          \`\`\`
+          $(cat distdir/sha256sum.txt)
+          \`\`\`
+          EOF
