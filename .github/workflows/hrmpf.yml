@@ -1,8 +1,12 @@
-name: Build void images
+name: Build hrmpf images
 
 on:
   workflow_dispatch:
     inputs:
+      version:
+        description: "Override version for images"
+        required: false
+        type: string
       archs:
         description: "Archs to build for"
         default: "x86_64 aarch64"
@@ -18,6 +22,9 @@ on:
         default: ""
         required: false
         type: string
+  push:
+    tags:
+      - 'hrmpf-*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -27,12 +34,17 @@ defaults:
   run:
     shell: bash
 
+permissions:
+  contents: write
+
 jobs:
   prepare:
     name: Prepare Environment
     runs-on: ubuntu-latest
     outputs:
+      version: ${{ steps.prep.outputs.version }}
       archs: ${{ steps.prep.outputs.archs }}
+      extra_args: ${{ steps.prep.outputs.extra_args }}
 
     steps:
       - name: Prepare Environment
@@ -42,7 +54,18 @@ jobs:
             sed 's/\s\+/ /g' | jq -Rrc 'split(" ")'
           }
 
-          echo "archs=$(echo "${{ inputs.archs }}" | jsonify)" >> $GITHUB_OUTPUT
+          TAG="${{ github.ref_name }}"
+          if [ "${{ github.ref_type }}" = "tag" ] && [ "${TAG}" != "${TAG#hrmpf-}" ]; then
+            # if a release, use defaults
+            echo "version=${TAG#hrmpf-}" >> $GITHUB_OUTPUT
+            echo "archs=$(echo "x86_64 aarch64" | jsonify)" >> $GITHUB_OUTPUT
+            echo "extra_args=-P 'pinebookpro x13s'" >> $GITHUB_OUTPUT
+          else
+            # if manual
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+            echo "archs=$(echo "${{ inputs.archs }}" | xargs | jsonify)" >> $GITHUB_OUTPUT
+            echo "extra_args=-P '${{ inputs.platforms }}' ${{ inputs.extra_args }}" >> $GITHUB_OUTPUT
+          fi
 
   build-hrmpf:
     name: Build Hrmpf ISOs
@@ -60,6 +83,8 @@ jobs:
         - /dev:/dev
       env:
         PATH: '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:/usr/local/bin:/tmp/bin'
+        VERSION: ${{ needs.prepare.outputs.version }}
+        EXTRA_ARGS: ${{ needs.prepare.outputs.extra_args }}
 
     steps:
       - name: Prepare container
@@ -71,7 +96,7 @@ jobs:
 
       - name: Build Hrmpf ISOs
         run: |
-          ./mkhrmpf.sh -a "${{ matrix.arch }}" -- -P "${{ inputs.platforms }}" ${{ inputs.extra_args }}
+          ./mkhrmpf.sh -a "${{ matrix.arch }}"
 
       - name: Prepare artifacts for upload
         run: |
@@ -81,7 +106,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: hrmpf-${{ matrix.arch }}
+          name: hrmpf-${{ matrix.arch }}-${{ needs.prepare.outputs.version }}
           path: |
             distdir/*
           if-no-files-found: error
@@ -101,7 +126,7 @@ jobs:
     steps:
       - name: Prepare container
         shell: sh
-        run: xbps-install -Syu xbps && xbps-install -yu
+        run: xbps-install -Syu xbps && xbps-install -yu && xbps-install -yu mktorrent b3sum
 
       - name: Clone and checkout
         uses: classabbyamp/treeless-checkout-action@v1
@@ -113,14 +138,30 @@ jobs:
           merge-multiple: true
 
       - name: Prepare artifacts for upload
+        id: checksum
         run: |
-          cd distdir && sha256 * > sha256sum.txt
+          pushd distdir
+          sha256sum --tag *.iso > checksums.txt
+          b2sum --tag *.iso >> checksums.txt
+          b3sum *.iso | sed -E 's/^([a-z0-9]+)\s+(.+)$/BLAKE3 (\2) = \1/' >> checksums.txt
+          popd
+          echo '```' > release-body.txt
+          cat distdir/checksums.txt >> release-body.txt
+          echo '```' >> release-body.txt
+
+      - name: Create torrent
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          cd distdir
+          for f in ./*.iso; do
+            ../mktorrent.sh "$f"
+          done
 
       - name: Upload artifacts
         id: upload
         uses: actions/upload-artifact@v4
         with:
-          name: hrmpf
+          name: hrmpf-${{ env.VERSION }}
           path: |
             distdir/*
           if-no-files-found: error
@@ -136,6 +177,17 @@ jobs:
 
           ### Checksums
           \`\`\`
-          $(cat distdir/sha256sum.txt)
+          $(cat distdir/checksums.txt)
           \`\`\`
           EOF
+
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: hrmpf ${{ needs.prepare.outputs.version }}
+          body_path: release-body.txt
+          preserve_order: true
+          files: |
+            distdir/*.iso
+            distdir/*.torrent
