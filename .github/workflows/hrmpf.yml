@@ -42,7 +42,7 @@ jobs:
             sed 's/\s\+/ /g' | jq -Rrc 'split(" ")'
           }
 
-          echo "archs=$(echo "${{ inputs.archs }}" | jsonify)" >> $GITHUB_OUTPUT
+          echo "archs=$(echo "${{ inputs.archs }}" | xargs | jsonify)" >> $GITHUB_OUTPUT
 
   build-hrmpf:
     name: Build Hrmpf ISOs
@@ -101,7 +101,7 @@ jobs:
     steps:
       - name: Prepare container
         shell: sh
-        run: xbps-install -Syu xbps && xbps-install -yu
+        run: xbps-install -Syu xbps && xbps-install -yu && xbps-install mktorrent
 
       - name: Clone and checkout
         uses: classabbyamp/treeless-checkout-action@v1
@@ -115,6 +115,15 @@ jobs:
       - name: Prepare artifacts for upload
         run: |
           cd distdir && sha256 * > sha256sum.txt
+
+      # TODO: checkbox input for torrent creation
+      # TODO: force datecode (for tags?)
+      - name: Create torrent
+        run: |
+          cd distdir
+          for f in ./*.iso; do
+            ./mktorrent.sh "$f"
+          done
 
       - name: Upload artifacts
         id: upload
