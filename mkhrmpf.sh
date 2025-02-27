@@ -1,5 +1,8 @@
 #!/bin/bash
 
+: "${VERSION:=$(date -u +%Y%m%d)}"
+read -r -a extra_args <<< "$EXTRA_ARGS"
+
 while getopts a: FLAG; do
 	case "$FLAG" in
 		a) ARCH="$OPTARG" ;;
@@ -99,6 +102,7 @@ esac
 	-A "gawk tnftp inetutils-hostname libressl-netcat dash vim-common" \
 	-S "acpid binfmt-support dhcpcd gpm sshd" \
 	-I hrmpf-include \
+	-o "hrmpf-${ARCH}-${VERSION}.iso" \
+	-a "${ARCH}" \
 	"${extra_args[@]}" \
-	${ARCH:+-a $ARCH} \
 	"$@"
