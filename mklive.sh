@@ -257,6 +257,10 @@ generate_initramfs() {
     if [ "$BOOT_FILES" ]; then
         cp $BOOT_FILES $BOOT_DIR
     fi
+
+    # unnecessary inside the image
+    rm "$ROOTFS"/boot/initramfs*
+    rm "$ROOTFS"/boot/vmlinuz*
 }
 
 cleanup_rootfs() {
