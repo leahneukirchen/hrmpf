@@ -214,7 +214,6 @@ mawk
 mbuffer
 mc
 metalog
-miller
 minised
 ministat
 mlog
@@ -533,7 +532,6 @@ vim
 
 # clients
 alpine
-bombadillo
 edbrowse
 elinks
 ii
@@ -549,7 +547,6 @@ mcabber
 mpop
 mutt
 ncftp
-poezio
 rtorrent
 s-nail
 sacc
