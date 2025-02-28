@@ -62,7 +62,11 @@ jobs:
             echo "extra_args=-P 'pinebookpro x13s'" >> $GITHUB_OUTPUT
           else
             # if manual
-            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+            if [ -z "${{ inputs.version }}" ]; then
+              echo "version=$(date -u +%Y%m%d)" >> $GITHUB_OUTPUT
+            else
+              echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+            fi
             echo "archs=$(echo "${{ inputs.archs }}" | xargs | jsonify)" >> $GITHUB_OUTPUT
             echo "extra_args=-P '${{ inputs.platforms }}' ${{ inputs.extra_args }}" >> $GITHUB_OUTPUT
           fi
@@ -83,8 +87,6 @@ jobs:
         - /dev:/dev
       env:
         PATH: '/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/sbin:/usr/local/bin:/tmp/bin'
-        VERSION: ${{ needs.prepare.outputs.version }}
-        EXTRA_ARGS: ${{ needs.prepare.outputs.extra_args }}
 
     steps:
       - name: Prepare container
@@ -95,6 +97,9 @@ jobs:
         uses: classabbyamp/treeless-checkout-action@v1
 
       - name: Build Hrmpf ISOs
+        env:
+          VERSION: ${{ needs.prepare.outputs.version }}
+          EXTRA_ARGS: ${{ needs.prepare.outputs.extra_args }}
         run: |
           ./mkhrmpf.sh -a "${{ matrix.arch }}"
 

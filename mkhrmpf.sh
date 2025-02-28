@@ -1,7 +1,7 @@
 #!/bin/bash
 
 : "${VERSION:=$(date -u +%Y%m%d)}"
-read -r -a extra_args <<< "$EXTRA_ARGS"
+IFS=$'\n' extra_args=( $(xargs -n1 <<< "$EXTRA_ARGS") )
 
 while getopts a: FLAG; do
 	case "$FLAG" in
@@ -56,7 +56,7 @@ case "$ARCH" in
 		sed "s/@@MKLIVE_VERSION@@/$(date -u +%Y%m%d)/g" < installer.sh > hrmpf-include/usr/bin/void-installer
 		chmod 0755 hrmpf-include/usr/bin/void-installer
 
-		extra_args=(
+		extra_args+=(
 			-s "xz -Xbcj x86"
 			-B extra/balder10.img
 			-B extra/mhdd32ver4.6.iso
@@ -69,7 +69,7 @@ case "$ARCH" in
 		mkdir -p hrmpf-include/usr/bin
 		printf "#!/bin/sh\necho 'void-installer is not supported on this live image'\n" > hrmpf-include/usr/bin/void-installer
 		chmod 0755 hrmpf-include/usr/bin/void-installer
-		extra_args=(
+		extra_args+=(
 			-s "xz -Xbcj arm"
 		)
 		;;
