@@ -222,16 +222,24 @@ copy_include_directories() {
 
 generate_initramfs() {
     local _args
+    dracut_args=(
+        -N --"${INITRAMFS_COMPRESSION}"
+        --add-drivers "ahci"
+        --omit-drivers "amdgpu nouveau radeon bcachefs xfs btrfs ocfs2 f2fs"
+        --force-add "vmklive livenet autoinstaller"
+        --omit "systemd bcachefs btrfs rescue resume zfs qemu lvm mdraid crypt "
+	--nofscks
+    )
 
     copy_dracut_files "$ROOTFS"
     copy_autoinstaller_files "$ROOTFS"
     if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
-        chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
-            --add-drivers "ahci" --force-add "vmklive livenet autoinstaller" --omit systemd "/boot/initrd-lts" $LTSKERNELVERSION
+        chroot "$ROOTFS" env -i /usr/bin/dracut "${dracut_args[@]}" \
+            "/boot/initrd-lts" $LTSKERNELVERSION
         [ $? -ne 0 ] && die "Failed to generate the initramfs"
     fi
-    chroot "$ROOTFS" env -i /usr/bin/dracut -N --"${INITRAMFS_COMPRESSION}" \
-        --add-drivers "ahci" --force-add "vmklive livenet autoinstaller" --omit systemd "/boot/initrd" $KERNELVERSION
+    chroot "$ROOTFS" env -i /usr/bin/dracut "${dracut_args[@]}" \
+        "/boot/initrd" $KERNELVERSION
     [ $? -ne 0 ] && die "Failed to generate the initramfs"
 
     if [ "$LTSKERNELVERSION" != "$KERNELVERSION" ]; then
