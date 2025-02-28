@@ -33,7 +33,9 @@ unrar
 
 # rescue & forensics
 # cannot be installed when crossbuilding an image
-qemu-user
+qemu-user-aarch64
+qemu-user-amd64
+qemu-user-i386
 
 # entertainment
 crawl
