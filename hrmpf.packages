@@ -37,7 +37,6 @@ stress-ng
 sysstat
 tiptop
 tpm-tools
-unixbench
 usbutils
 virt-what
 
@@ -156,6 +155,7 @@ buffer
 busybox
 byobu
 cdrtools
+charliecloud
 cmark
 colordiff
 convmv
@@ -184,6 +184,7 @@ fail
 faketime
 fbgrab
 fbset
+fclones
 fdupes
 file
 findutils
@@ -221,8 +222,10 @@ mmv
 mtm
 multitail
 multitime
+nano-exporter
 ncdu
 necho
+nitro
 nocache
 nq
 nsjail
@@ -261,6 +264,7 @@ shmux
 sispmctl
 snooze
 socklog-void
+spit
 su-exec
 sudo
 tab
@@ -279,9 +283,9 @@ wgetpaste
 which
 xe
 xjobs
+xmirror
 xmlstarlet
 xtools
-xmirror
 
 # filesystems & storage
 bcache-tools
@@ -368,6 +372,7 @@ sharutils
 tar
 unp
 unzip
+xpar
 xz
 zip
 zstd
@@ -510,6 +515,7 @@ zpaq
 dash
 fish-shell
 mksh
+oils-for-unix
 pdmenu
 posh
 rc
