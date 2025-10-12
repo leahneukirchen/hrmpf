@@ -15,3 +15,6 @@ release/
 packer/cloud-*/
 packer/vagrant-*/
 mklive-build*/
+hrmpf-include/
+installed.pkgs
+installed.alternatives
