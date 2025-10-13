@@ -155,7 +155,6 @@ buffer
 busybox
 byobu
 cdrtools
-charliecloud
 cmark
 colordiff
 convmv
@@ -188,7 +187,6 @@ fclones
 fdupes
 file
 findutils
-firejail
 fwupd
 fzy
 gawk
@@ -525,7 +523,6 @@ zsh
 
 # text editors
 dte
-e3
 ed
 ex-vi
 jupp
