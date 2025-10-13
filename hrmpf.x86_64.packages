@@ -15,7 +15,9 @@ msr-tools
 procmail
 
 # general system tools
+charliecloud
 efmd
+firejail
 intel-ucode
 msrc_base
 oue
@@ -50,6 +52,7 @@ es
 ksh
 
 # text editors
+e3
 emacs
 
 # clients
