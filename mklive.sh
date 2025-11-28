@@ -268,7 +268,7 @@ generate_initramfs() {
 
     # unnecessary inside the image
     rm "$ROOTFS"/boot/initramfs*
-    rm "$ROOTFS"/boot/vmlinuz*
+    rm "$ROOTFS"/boot/vmlinu{z,x}*
 }
 
 cleanup_rootfs() {
