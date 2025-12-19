@@ -26,6 +26,7 @@ lsof
 lsscsi
 ltrace
 memtester
+nano-exporter
 nethogs
 pciutils
 powertop
@@ -98,6 +99,7 @@ net-tools
 nfs-utils
 nftables
 ngrep
+nitro
 nload
 nmon
 ntp
@@ -112,8 +114,8 @@ radvd
 redsocks
 rpcbind
 s6
-s6-linux-utils
 s6-dns
+s6-linux-utils
 s6-networking
 shorewall
 shorewall6
@@ -262,6 +264,7 @@ shmux
 sispmctl
 snooze
 socklog-void
+spit
 spit
 su-exec
 sudo
