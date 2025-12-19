@@ -104,5 +104,6 @@ esac
 	-I hrmpf-include \
 	-o "hrmpf-${ARCH}-${VERSION}.iso" \
 	-a "${ARCH}" \
+	-v linux6.18 \
 	"${extra_args[@]}" \
 	"$@"
