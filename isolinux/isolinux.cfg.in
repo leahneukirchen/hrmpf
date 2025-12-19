@@ -72,10 +72,8 @@ LABEL hdt
 MENU LABEL HDT (Hardware Detection Tool)
 KERNEL hdt.c32
 LABEL memtest86+
-MENU LABEL memtest86+ 7.20
-KERNEL memdisk
-INITRD /boot/memtest86+-7.20.iso
-APPEND iso
+MENU LABEL memtest86+ 8.00
+KERNEL /boot/mt86p_800_x86_64
 LABEL mhdd32
 MENU LABEL MHDD32 v4.6 Hard Drive Analysis Tool
 KERNEL memdisk

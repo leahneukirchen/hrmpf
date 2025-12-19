@@ -61,7 +61,7 @@ case "$ARCH" in
 			-B extra/balder10.img
 			-B extra/mhdd32ver4.6.iso
 			-B extra/ipxe.iso
-			-B extra/memtest86+-7.20.iso
+			-B extra/mt86p_800_x86_64
 			-B extra/grub2.iso
 		)
 		;;

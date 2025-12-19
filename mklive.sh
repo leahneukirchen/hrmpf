@@ -488,9 +488,6 @@ EOF
     umount "$GRUB_EFI_TMPDIR"
     losetup --detach "${LOOP_DEVICE}"
     rm -rf "$GRUB_EFI_TMPDIR"
-
-    # include memtest86+
-    cp -f "$VOIDHOSTDIR"/boot/memtest86+/memtest.efi "$BOOT_DIR"
 }
 
 generate_squashfs() {
