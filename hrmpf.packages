@@ -265,7 +265,6 @@ sispmctl
 snooze
 socklog-void
 spit
-spit
 su-exec
 sudo
 tab
@@ -290,6 +289,7 @@ xtools
 
 # filesystems & storage
 bcache-tools
+bcachefs-dkms
 bcachefs-tools
 btrfs-progs
 cryptsetup
