@@ -5,7 +5,7 @@
                    |_|       
 
 Welcome to the hrmpf rescue system, built on Void Linux.
-This project is based on void-mklive.
+This project is based on void-mklive. Console only, no GUI.
 
 #### Dependencies
 
