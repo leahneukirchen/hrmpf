@@ -4,3 +4,6 @@ linux6.18-headers
 
 # bootloader
 grub-arm64-efi
+
+# tools
+hashcat

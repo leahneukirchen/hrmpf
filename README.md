@@ -42,7 +42,7 @@ This project is based on void-mklive. Console only, no GUI.
 
 #### Minimum requirements
 
-* x86_64 CPU
+* x86_64, aarch64 or i686 CPU
 * 512 MB RAM
 
 #### Usage

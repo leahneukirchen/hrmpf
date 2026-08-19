@@ -384,7 +384,6 @@ ent
 ettercap
 gnupg2
 gnupg2-scdaemon
-hashcat
 haveged
 john
 keyutils
@@ -439,10 +438,8 @@ texinfo
 aide
 antiword
 b3sum
-bcal
 biew
 binfmt-support
-binwalk
 bvi
 chkrootkit
 dcraw

@@ -51,11 +51,21 @@ mkdir -p hrmpf-include/etc/sysctl.d
 touch hrmpf-include/etc/sysctl.d/10-void-user.conf
 
 case "$ARCH" in
-	x86_64*)
+	x86_64*|i686*)
+		echo "void-installer is supported on this live image"
 		mkdir -p hrmpf-include/usr/bin
 		sed "s/@@MKLIVE_VERSION@@/$(date -u +%Y%m%d)/g" < installer.sh > hrmpf-include/usr/bin/void-installer
 		chmod 0755 hrmpf-include/usr/bin/void-installer
+		;;
+	aarch64*)
+		mkdir -p hrmpf-include/usr/bin
+		printf "#!/bin/sh\necho 'void-installer is not supported on this live image'\n" > hrmpf-include/usr/bin/void-installer
+		chmod 0755 hrmpf-include/usr/bin/void-installer
+		;;
+esac
 
+case "$ARCH" in
+	x86_64*)
 		extra_args+=(
 			-s "xz -Xbcj x86"
 			-B extra/balder10.img
@@ -66,9 +76,6 @@ case "$ARCH" in
 		)
 		;;
 	aarch64*)
-		mkdir -p hrmpf-include/usr/bin
-		printf "#!/bin/sh\necho 'void-installer is not supported on this live image'\n" > hrmpf-include/usr/bin/void-installer
-		chmod 0755 hrmpf-include/usr/bin/void-installer
 		extra_args+=(
 			-s "xz -Xbcj arm"
 		)

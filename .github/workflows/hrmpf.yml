@@ -9,7 +9,7 @@ on:
         type: string
       archs:
         description: "Archs to build for"
-        default: "x86_64 aarch64"
+        default: "x86_64 aarch64 i686"
         required: false
         type: string
       platforms:
@@ -58,7 +58,7 @@ jobs:
           if [ "${{ github.ref_type }}" = "tag" ] && [ "${TAG}" != "${TAG#hrmpf-}" ]; then
             # if a release, use defaults
             echo "version=${TAG#hrmpf-}" >> $GITHUB_OUTPUT
-            echo "archs=$(echo "x86_64 aarch64" | jsonify)" >> $GITHUB_OUTPUT
+            echo "archs=$(echo "x86_64 aarch64 i686" | jsonify)" >> $GITHUB_OUTPUT
             echo "extra_args=-P 'pinebookpro x13s'" >> $GITHUB_OUTPUT
           else
             # if manual

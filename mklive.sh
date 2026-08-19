@@ -30,7 +30,7 @@ umask 022
 
 REQUIRED_PKGS=(base-files libgcc dash coreutils sed tar gawk squashfs-tools xorriso)
 TARGET_PKGS=(base-files)
-INITRAMFS_PKGS=(binutils xz device-mapper dhclient dracut-network openresolv)
+INITRAMFS_PKGS=(binutils xz device-mapper dhclient dracut-network openresolv curl)
 PACKAGE_LIST=()
 IGNORE_PKGS=()
 PLATFORMS=()
@@ -502,28 +502,14 @@ EOF
 
 generate_squashfs() {
     umount_pseudofs || exit 1
-
-    # Find out required size for the rootfs and create an ext3fs image off it.
-    ROOTFS_SIZE=$(du --apparent-size -sm "$ROOTFS"|awk '{print $1}')
-    if [ -z "$ROOTFS_FREESIZE" ]; then
-        ROOTFS_FREESIZE="$((ROOTFS_SIZE/6))"
-    fi
-    mkdir -p "$BUILDDIR/tmp/LiveOS"
-    truncate -s "$((ROOTFS_SIZE+ROOTFS_FREESIZE))M" \
-	    "$BUILDDIR"/tmp/LiveOS/ext3fs.img >/dev/null 2>&1
-    mkdir -p "$BUILDDIR/tmp-rootfs"
-    mkfs.ext3 -F -m1 "$BUILDDIR/tmp/LiveOS/ext3fs.img" >/dev/null 2>&1
-    mount -o loop "$BUILDDIR/tmp/LiveOS/ext3fs.img" "$BUILDDIR/tmp-rootfs"
-    cp -a "$ROOTFS"/* "$BUILDDIR"/tmp-rootfs/
-    umount -f "$BUILDDIR/tmp-rootfs"
     mkdir -p "$IMAGEDIR/LiveOS"
 
-    "$VOIDHOSTDIR"/usr/bin/mksquashfs "$BUILDDIR/tmp" "$IMAGEDIR/LiveOS/squashfs.img" \
+    "$VOIDHOSTDIR"/usr/bin/mksquashfs "$ROOTFS" "$IMAGEDIR/LiveOS/squashfs.img" \
         -comp ${SQUASHFS_COMPRESSION} || die "Failed to generate squashfs image"
     chmod 444 "$IMAGEDIR/LiveOS/squashfs.img"
 
-    # Remove rootfs and temporary dirs, we don't need them anymore.
-    rm -rf "$ROOTFS" "$BUILDDIR/tmp-rootfs" "$BUILDDIR/tmp"
+    # Remove rootfs, we don't need it anymore.
+    rm -rf "$ROOTFS"
 }
 
 generate_iso_image() {
@@ -626,7 +612,14 @@ HOST_ARCH=$(xbps-uhelper arch)
 XBPS_TARGET_ARCH="$TARGET_ARCH" register_binfmt
 
 case "$TARGET_ARCH" in
-	x86_64*|i686*)
+	i686*)
+		# no EFI on i686: unsupported by most old legacy hardware
+		BOOTLOADERS=(syslinux)
+		IMAGE_TYPE='hybrid'
+		TARGET_PKGS+=(syslinux memtest86+)
+        PLATFORMS=() # arm only
+		;;
+	x86_64*)
 		BOOTLOADERS=(syslinux grub)
 		IMAGE_TYPE='hybrid'
 		TARGET_PKGS+=(syslinux grub-i386-efi grub-x86_64-efi memtest86+)
@@ -794,8 +787,10 @@ if [ "$IMAGE_TYPE" = hybrid ]; then
     generate_isolinux_boot
 fi
 
-print_step "Generating GRUB support for EFI systems..."
-generate_grub_efi_boot
+if printf '%s\n' "${BOOTLOADERS[@]}" | grep -qx grub; then
+    print_step "Generating GRUB support for EFI systems..."
+    generate_grub_efi_boot
+fi
 
 print_step "Cleaning up rootfs..."
 cleanup_rootfs

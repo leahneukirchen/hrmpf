@@ -24,6 +24,9 @@ intel-ucode
 msrc_base
 oue
 sof-firmware
+hashcat
+bcal
+binwalk
 
 # bootloader
 grub
